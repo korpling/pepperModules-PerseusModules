@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<component name="AldtExporterComponent" factory="PepperExporterComponentFactory">
+	<implementation class="edu.tufts.perseus.pepper.modules.PerseusModules.PereusExporter"/>
+ <service>
+    <provide interface="de.hub.corpling.pepper.pepperInterface.PepperExporter"/>
+ </service>
+	
+</component>

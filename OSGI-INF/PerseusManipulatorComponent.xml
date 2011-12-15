@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<component name="AldtManipulatorComponent" factory="PepperManipulatorComponentFactory">
+	<implementation class="edu.tufts.perseus.pepper.modules.PerseusModules.PerseusManipulator"/>
+ <service>
+    <provide interface="de.hub.corpling.pepper.pepperInterface.PepperManipulator"/>
+ </service>
+</component>
