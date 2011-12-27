@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<component name="AldtImporterComponent" factory="PepperImporterComponentFactory">
-	<implementation class="edu.tufts.perseus.pepper.modules.PerseusModules.PerseusImporter"/>
- <service>
-    <provide interface="de.hub.corpling.pepper.pepperInterface.PepperImporter"/>
- </service>
-	
-</component>

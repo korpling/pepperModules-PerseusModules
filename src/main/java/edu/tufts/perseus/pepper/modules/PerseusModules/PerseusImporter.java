@@ -1,50 +1,57 @@
+/**
+ * Copyright 2009 TUFTS university.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ *
+ */
 package edu.tufts.perseus.pepper.modules.PerseusModules;
 
-import edu.tufts.perseus.pepper.modules.PerseusModules.exceptions.*;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import org.xml.sax.helpers.DefaultHandler;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.log.LogService;
 
-import de.hub.corpling.pepper.pepperExceptions.PepperModuleException;
-import de.hub.corpling.pepper.pepperInterface.FormatDefinition;
-import de.hub.corpling.pepper.pepperInterface.PepperImporter;
-import de.hub.corpling.pepper.pepperInterface.PepperInterfaceFactory;
-import de.hub.corpling.pepper.pepperInterface.impl.PepperImporterImpl;
-import de.hub.corpling.salt.saltCommon.sCorpusStructure.SCorpus;
-import de.hub.corpling.salt.saltCommon.sCorpusStructure.SCorpusGraph;
-import de.hub.corpling.salt.saltCommon.sCorpusStructure.SDocument;
-import de.hub.corpling.salt.saltCore.SElementId;
+import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperExceptions.PepperModuleException;
+import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.FormatDefinition;
+import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.PepperImporter;
+import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.PepperInterfaceFactory;
+import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.impl.PepperImporterImpl;
+import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SCorpus;
+import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SCorpusGraph;
+import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SDocument;
+import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SElementId;
+import edu.tufts.perseus.pepper.modules.PerseusModules.exceptions.PerseusImporterException;
+
 
 /**
- * This is a sample PepperImporter, which can be used for creating individual Importers for the 
- * Pepper Framework. Therefore you have to take a look to todos and adapt the code.
- * 
- * <ul>
- *  <li>the salt model to fill, manipulate or export can be accessed via SaltProject::this.getSaltProject()</li>
- * 	<li>special parameters given by Pepper workflow can be accessed via URI::this.getSpecialParams()</li>
- *  <li>a place to store temprorary datas for processing can be accessed via URI::this.getTemproraries()</li>
- *  <li>a place where resources of this bundle are, can be accessed via URL::this.getResources()</li>
- *  <li>a logService can be accessed via LogService::this.getLogService()</li>
- * </ul>
- * @author Florian Zipser
+ * This {@link PepperImporter} imports data coming from the Perseus format into Salt.
+ * @author Bridget Almas
  * @version 1.0
  *
  */
+@Component(name="EXMARaLDAImporterComponent", factory="PepperImporterComponentFactory")
+@Service(value=PepperImporter.class)
 public class PerseusImporter extends PepperImporterImpl implements PepperImporter
 {
 	
@@ -65,7 +72,7 @@ public class PerseusImporter extends PepperImporterImpl implements PepperImporte
 		
 		{//for testing the symbolic name has to be set without osgi
 			if (	(this.getSymbolicName()==  null) ||
-					(this.getSymbolicName().equalsIgnoreCase("")))
+					(this.getSymbolicName().isEmpty()))
 				//TODO /2/: change the symbolic name to your symbolic name as in OSGI-Meta-Inf 
 				this.setSymbolicName("edu.tufts.perseus.pepper.modules.PerseusModules");
 		}//for testing the symbolic name has to be set without osgi

@@ -1,17 +1,35 @@
+/**
+ * Copyright 2009 TUFTS university.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ *
+ */
 package edu.tufts.perseus.pepper.modules.PerseusModules;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
 import org.eclipse.emf.common.util.BasicEList;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.log.LogService;
 
-import de.hub.corpling.pepper.pepperExceptions.PepperModuleException;
-import de.hub.corpling.pepper.pepperInterface.FormatDefinition;
-import de.hub.corpling.pepper.pepperInterface.PepperExporter;
-import de.hub.corpling.pepper.pepperInterface.PepperInterfaceFactory;
-import de.hub.corpling.pepper.pepperInterface.impl.PepperExporterImpl;
-import de.hub.corpling.salt.saltCommon.sCorpusStructure.SCorpus;
-import de.hub.corpling.salt.saltCommon.sCorpusStructure.SDocument;
-import de.hub.corpling.salt.saltCore.SElementId;
+import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperExceptions.PepperModuleException;
+import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.FormatDefinition;
+import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.PepperExporter;
+import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.PepperInterfaceFactory;
+import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.impl.PepperExporterImpl;
+import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SCorpus;
+import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SDocument;
+import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SElementId;
 
 /**
  * This is a sample PepperExporter, which can be used for creating individual Exporters for the 
@@ -28,6 +46,8 @@ import de.hub.corpling.salt.saltCore.SElementId;
  * @version 1.0
  *
  */
+@Component(name="PerseusExporterComponent", factory="PerseusExporterComponentFactory")
+@Service(value=PepperExporter.class)
 public class PerseusExporter extends PepperExporterImpl implements PepperExporter
 {
 	public PerseusExporter()
