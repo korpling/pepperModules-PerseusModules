@@ -36,6 +36,7 @@ import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperExceptions.PepperMo
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.FormatDefinition;
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.PepperImporter;
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.PepperInterfaceFactory;
+import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.RETURNING_MODE;
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.impl.PepperImporterImpl;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SCorpus;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SCorpusGraph;
@@ -74,7 +75,7 @@ public class PerseusImporter extends PepperImporterImpl implements PepperImporte
 			if (	(this.getSymbolicName()==  null) ||
 					(this.getSymbolicName().isEmpty()))
 				//TODO /2/: change the symbolic name to your symbolic name as in OSGI-Meta-Inf 
-				this.setSymbolicName("edu.tufts.perseus.pepper.modules.PerseusModules");
+				this.setSymbolicName("edu.tufts.perseus.pepperModules-PerseusModules");
 		}//for testing the symbolic name has to be set without osgi
 		
 		{//set list of formats supported by this module
@@ -91,7 +92,7 @@ public class PerseusImporter extends PepperImporterImpl implements PepperImporte
 			if (this.getLogService()!= null)
 				this.getLogService().log(LogService.LOG_DEBUG,this.getName()+" is created...");
 		}//just for logging: to say, that the current module has been loaded
-		this.mapper= new Perseus2SaltMapper();		
+		this.mapper= new Perseus2SaltMapper();
 	}
 	
 	
@@ -228,7 +229,8 @@ public class PerseusImporter extends PepperImporterImpl implements PepperImporte
 					SDocument sDoc= (SDocument) sElementId.getSIdentifiableElement();
 					{	
 						mapper.setLogService(this.getLogService());
-						this.mapper.setDocument(sDoc);									
+						this.mapper.setDocument(sDoc);
+						this.mapper.setResourcesURI(this.getResources());
 			            SAXParserFactory factory = SAXParserFactory.newInstance();			            
 			            try {
 			            	SAXParser parser = factory.newSAXParser();

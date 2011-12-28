@@ -63,7 +63,7 @@ public class PerseusExporter extends PepperExporterImpl implements PepperExporte
 			if (	(this.getSymbolicName()==  null) ||
 					(this.getSymbolicName().equalsIgnoreCase("")))
 				//TODO /2/: change the symbolic name to your symbolic name as in OSGI-Meta-Inf 
-				this.setSymbolicName("de.hub.corpling.pepper.modules.SampleModules");
+				this.setSymbolicName("edu.tufts.perseus.pepperModules-PerseusModules");
 		}//for testing the symbolic name has to be set without osgi
 		
 		{//set list of formats supported by this module

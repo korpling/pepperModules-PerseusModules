@@ -18,6 +18,7 @@
 package edu.tufts.perseus.pepper.modules.PerseusModules;
 
 import java.lang.String;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
@@ -59,6 +60,44 @@ import edu.tufts.perseus.pepper.modules.PerseusModules.exceptions.PerseusImporte
 
 public class Perseus2SaltMapper extends DefaultHandler  
 {
+	private URI resourcesURI= null;
+	
+	/**
+	 * Sets the {@link URI}, where to find the resources needed by this mapper. 
+	 * @param resourcesURI uri of resources
+	 */
+	public void setResourcesURI(URI resourcesURI) {
+		this.resourcesURI = resourcesURI;
+	}
+
+	/**
+	 * Returns the {@link URI}, where to find the resources needed by this mapper.
+	 * @return uri of resources
+	 */
+	public URI getResourcesURI() {
+		return resourcesURI;
+	}
+	
+	private LogService logService= null;
+	/**
+	 * Set the Log Service
+	 * @param a_log a {@link LogService} object which with should be logged
+	 */
+	public void setLogService(LogService a_log)
+	{
+		this.logService = a_log;
+	}
+	
+	/**
+	 * Returns the Log Service
+	 * @return current {@link LogService} object
+	 */
+	public LogService getLogService()
+	{
+		return(this.logService);
+	}
+
+	
 //	private SCorpus sCorpus = null;
 	private ArrayList<SDocument> docList = null;
 	private SDocument sDocument= null;
@@ -73,9 +112,11 @@ public class Perseus2SaltMapper extends DefaultHandler
 
 //	private String KW_TOKENSEP="salt.tokenSeperator";	
 	public static final String DEFAULT_SEPARATOR= " ";
-	private LogService logService;
 	private String docLang = "";
 	private StreamSource xsltSource;
+	
+	public static final String FILE_ALPHEIOS_XSL="alpheios-beta2unicode.xsl";
+	public static final String FILE_DUMMY_XSL="dummy.xml";
 //	private SSpan currentSpan;
 //	private SToken currentSentenceToken;
 
@@ -311,7 +352,15 @@ public class Perseus2SaltMapper extends DefaultHandler
 			// TODO externalize location of xslt
 			if (this.docLang != null && this.docLang.equals("grc"))
 			{				
-				this.xsltSource = new StreamSource(new File("resources/alpheios-beta2unicode.xsl"));
+//				this.xsltSource = new StreamSource(new File("resources/alpheios-beta2unicode.xsl"));
+				if (this.getResourcesURI()== null)
+					throw new PerseusImporterException("Cannot import data, because the resource folder is not set.");
+				File xsltFile= new File(this.getResourcesURI().toFileString()+"/"+FILE_ALPHEIOS_XSL);
+				
+				if (!xsltFile.exists())
+					throw new PerseusImporterException("Cannot import data, because a necessary resource file '"+xsltFile.getAbsolutePath()+"' does not exist.");
+				this.xsltSource = new StreamSource(xsltFile);
+				
 			}
 		}			
 		else if (a_qName.equals("annotator") && this.currentSentence == null)
@@ -336,16 +385,22 @@ public class Perseus2SaltMapper extends DefaultHandler
 		throws SAXException 
 	{
 
-		if (a_qName.equals("date"))
+		if ("date".equals(a_qName))
 		{
 			java.text.DateFormat df = new java.text.SimpleDateFormat(IConstants.DATE_FORMAT);
 			try {				
 				// TODO add metadata annotation to layer instead of document
 				this.addDate(this.getDocument(), df.parse(this.currentText));
-			} catch (java.text.ParseException a_e)
+			} catch (ParseException a_e)
 			{
-				throw new SAXException("Unable to parse date " + currentText + ":",a_e);
-			}					
+				if (this.getLogService()!= null)
+					this.getLogService().log(LogService.LOG_WARNING, "Unable to parse date " + currentText + ":",a_e);
+//				throw new SAXException("Unable to parse date " + currentText + ":",a_e);
+			} catch (Exception e) {
+				if (this.getLogService()!= null)
+					this.getLogService().log(LogService.LOG_WARNING, "Unable to parse date " + currentText + ":",e);
+			}
+		
 		}
 		else if (a_qName.equals("annotator") && this.currentSentence == null)
 		{
@@ -406,16 +461,7 @@ public class Perseus2SaltMapper extends DefaultHandler
 	 * SALT Model Accessors 
 	 * 
 	 **********************************************************/
-	
-	/**
-	 * Set the Log Service
-	 */
-	
-	public void setLogService(LogService a_log)
-	{
-		this.logService = a_log;
-	}
-	
+		
 	/**
 	 * initialize for a new document
 	 */
@@ -620,7 +666,7 @@ public class Perseus2SaltMapper extends DefaultHandler
 			}									
 		}
 
-		if (lemma != null && ! lemma.equals(""))
+		if (lemma != null && ! lemma.isEmpty())
 		{
 			
 			SAnnotation sAnno = SaltFactory.eINSTANCE.createSLemmaAnnotation();	
@@ -641,12 +687,12 @@ public class Perseus2SaltMapper extends DefaultHandler
 			}
 		}
 		
-		if (sense != null && ! sense.equals(""))
+		if (sense != null && ! sense.isEmpty())
 		{
 			this.addSAnnotationString(sToken, IConstants.ANN_SENSE, sense);
 		}
 		
-		if (form != null && ! form.equals(""))
+		if (form != null && ! form.isEmpty())
 		{
 			this.log(LogService.LOG_DEBUG, "Adding Form Annotation");
 			SAnnotation sAnno = SaltFactory.eINSTANCE.createSAnnotation();														
@@ -849,6 +895,8 @@ public class Perseus2SaltMapper extends DefaultHandler
 		Perseus2SaltMapper mapper= new Perseus2SaltMapper();	
 		SDocument sdoc = SaltFactory.eINSTANCE.createSDocument();
 		mapper.setDocument(sdoc);
+		File resourceFolder= new File("./src/main/resources");
+		mapper.setResourcesURI(URI.createFileURI(resourceFolder.getAbsolutePath()));
 		  SAXParserFactory factory = SAXParserFactory.newInstance();			            
           try {
           	SAXParser parser = factory.newSAXParser();
@@ -880,7 +928,15 @@ public class Perseus2SaltMapper extends DefaultHandler
 		        TransformerFactory.newInstance(  );
 			try {		
 	            
-				Source dummyXmlSource = new StreamSource(new File("resources/dummy.xml"));
+//				Source dummyXmlSource = new StreamSource(new File("resources/dummy.xml"));
+				if (this.getResourcesURI()== null)	
+					throw new PerseusImporterException("Cannot import data, because the resource folder is not set.");
+				
+				File dummyXmlFile= new File(this.getResourcesURI().toFileString()+"/"+FILE_DUMMY_XSL);
+				if (!dummyXmlFile.exists())
+					throw new PerseusImporterException("Cannot import data, because a necessary resource file '"+dummyXmlFile.getAbsolutePath()+"' does not exist.");
+				Source dummyXmlSource = new StreamSource(dummyXmlFile);
+				
 			    Transformer trans =
 				    transFact.newTransformer(this.xsltSource);
 				trans.setParameter("e_in", a_text);
@@ -944,7 +1000,7 @@ public class Perseus2SaltMapper extends DefaultHandler
 		{
 			for (int i=1; i<segs; i++)
 			{
-				if (! name.equals(""))
+				if (! name.isEmpty())
 				{
 					name = name + ".";
 				}
