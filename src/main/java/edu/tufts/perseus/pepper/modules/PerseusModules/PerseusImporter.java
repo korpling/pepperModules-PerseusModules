@@ -17,6 +17,7 @@
  */
 package edu.tufts.perseus.pepper.modules.PerseusModules;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Map;
@@ -231,10 +232,12 @@ public class PerseusImporter extends PepperImporterImpl implements PepperImporte
 						mapper.setLogService(this.getLogService());
 						this.mapper.setDocument(sDoc);
 						this.mapper.setResourcesURI(this.getResources());
+						String text = this.mapper.transformText(documentPath.toFileString());
 			            SAXParserFactory factory = SAXParserFactory.newInstance();			            
 			            try {
 			            	SAXParser parser = factory.newSAXParser();
-				            parser.parse(documentPath.toFileString(),mapper);	
+				            parser.parse(new ByteArrayInputStream(text.getBytes("UTF-8")),
+				            		mapper);	
 			            } catch (Exception a_e)
 			            {
 			            	throw new PerseusImporterException(

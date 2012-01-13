@@ -349,19 +349,6 @@ public class Perseus2SaltMapper extends DefaultHandler
 			// lang
 			// date
 			this.docLang = a_atts.getValue("xml:lang");
-			// TODO externalize location of xslt
-			if (this.docLang != null && this.docLang.equals("grc"))
-			{				
-//				this.xsltSource = new StreamSource(new File("resources/alpheios-beta2unicode.xsl"));
-				if (this.getResourcesURI()== null)
-					throw new PerseusImporterException("Cannot import data, because the resource folder is not set.");
-				File xsltFile= new File(this.getResourcesURI().toFileString()+"/"+FILE_ALPHEIOS_XSL);
-				
-				if (!xsltFile.exists())
-					throw new PerseusImporterException("Cannot import data, because a necessary resource file '"+xsltFile.getAbsolutePath()+"' does not exist.");
-				this.xsltSource = new StreamSource(xsltFile);
-				
-			}
 		}			
 		else if (a_qName.equals("annotator") && this.currentSentence == null)
 		{
@@ -609,9 +596,13 @@ public class Perseus2SaltMapper extends DefaultHandler
 		//this.addSAnnotationString(sSpanRel, IConstants.ANN_RELATION, IConstants.ANN_RELATION_SPAN);		
 		
 		String postag = a_atts.getValue(IConstants.ATT_POSTAG);
-		String lemmaFull = a_atts.getValue(IConstants.ATT_LEMMA);		
-		String lemma = lemmaFull.replaceAll("[0-9]*$", "");
-		String sense = lemmaFull.replaceAll("^[^0-9]+", "");
+		String lemmaFull = a_atts.getValue(IConstants.ATT_LEMMA);
+		String lemma = null;
+		String sense = null;
+		if (lemmaFull != null) {
+			lemma = lemmaFull.replaceAll("[0-9]*$", "");
+			sense = lemmaFull.replaceAll("^[^0-9]+", "");
+		}
 		String form = a_atts.getValue(IConstants.ATT_FORM);
 		String relation = a_atts.getValue(IConstants.ATT_RELATION);
 		String id = a_atts.getValue(IConstants.ATT_ID);
@@ -670,21 +661,24 @@ public class Perseus2SaltMapper extends DefaultHandler
 		{
 			
 			SAnnotation sAnno = SaltFactory.eINSTANCE.createSLemmaAnnotation();	
-			sAnno.setSValue(this.transformText(lemma));
+			sAnno.setSValue(lemma);
 			sAnno.setNamespace(IConstants.NS);
 			sToken.addSAnnotation(sAnno); 
 			this.log(LogService.LOG_DEBUG, "Added Lemma Annotation " + sAnno.getSValueSTEXT());
 			
-			if (this.docLang != null && this.docLang.equals("grc"))
-			{
-				// TODO only if greek beta
-				SAnnotation bAnno = SaltFactory.eINSTANCE.createSLemmaAnnotation();	
-				bAnno.setSValue(lemma.replaceAll("\\\\", java.util.regex.Matcher.quoteReplacement("\\\\")));
-				bAnno.setNamespace(IConstants.NS);
-				bAnno.setName(IConstants.ANN_LEMMA_BETA);
-				sToken.addSAnnotation(bAnno); 
-				this.log(LogService.LOG_DEBUG, "Added Lemma-Beta Annotation " + bAnno.getSValueSTEXT());
-			}
+			// 2012-01-13 BALMAS : commenting this out for now because
+			// we are now transforming the entire file at startup to unicode without
+			// preserving betacode. If we really need the beta we can put it back in
+			// via the transform
+			//if (this.docLang != null && this.docLang.equals("grc"))
+			//{
+			//	SAnnotation bAnno = SaltFactory.eINSTANCE.createSLemmaAnnotation();	
+			//	bAnno.setSValue(lemma.replaceAll("\\\\", java.util.regex.Matcher.quoteReplacement("\\\\")));
+			//	bAnno.setNamespace(IConstants.NS);
+			//	bAnno.setName(IConstants.ANN_LEMMA_BETA);
+			//	sToken.addSAnnotation(bAnno); 
+			//	this.log(LogService.LOG_DEBUG, "Added Lemma-Beta Annotation " + bAnno.getSValueSTEXT());
+			//}
 		}
 		
 		if (sense != null && ! sense.isEmpty())
@@ -696,20 +690,24 @@ public class Perseus2SaltMapper extends DefaultHandler
 		{
 			this.log(LogService.LOG_DEBUG, "Adding Form Annotation");
 			SAnnotation sAnno = SaltFactory.eINSTANCE.createSAnnotation();														
-			sAnno.setSValue(this.transformText(form));
+			sAnno.setSValue(form);
 			sAnno.setNamespace(IConstants.NS);
 			sAnno.setName(IConstants.ATT_FORM);
 			sToken.addSAnnotation(sAnno); 
 			
-			if (this.docLang != null && this.docLang.equals("grc"))
-			{
-				SAnnotation bAnno = SaltFactory.eINSTANCE.createSAnnotation();								
-							
-				bAnno.setSValue(form.replaceAll("\\\\", java.util.regex.Matcher.quoteReplacement("\\\\")));
-				bAnno.setNamespace(IConstants.NS);
-				bAnno.setName(IConstants.ANN_FORM_BETA);
-				sToken.addSAnnotation(bAnno); 
-			}
+			// 2012-01-13 BALMAS : commenting this out for now because
+			// we are now transforming the entire file at startup to unicode without
+			// preserving betacode. If we really need the beta we can put it back in
+			// via the transform
+			//if (this.docLang != null && this.docLang.equals("grc"))
+			//{
+			//	SAnnotation bAnno = SaltFactory.eINSTANCE.createSAnnotation();								
+			//				
+			//	bAnno.setSValue(form.replaceAll("\\\\", java.util.regex.Matcher.quoteReplacement("\\\\")));
+			//	bAnno.setNamespace(IConstants.NS);
+			//	bAnno.setName(IConstants.ANN_FORM_BETA);
+			//	sToken.addSAnnotation(bAnno); 
+			//}
 		}
 		
 		// store the token, head and relation
@@ -749,7 +747,7 @@ public class Perseus2SaltMapper extends DefaultHandler
 		
 		//set startpos to current text length
 		startPos= this.getTextDS().getSText().length();
-		this.getTextDS().setSText(this.getTextDS().getSText()+ this.transformText(form));
+		this.getTextDS().setSText(this.getTextDS().getSText()+ form);
 		endPos= this.getTextDS().getSText().length();				 
 		
 		//create STextualRelation
@@ -812,8 +810,10 @@ public class Perseus2SaltMapper extends DefaultHandler
 				id);
 		this.addSAnnotationString(sStructure, IConstants.ANN_SUBDOC, 
 				chunkId);
-		this.addSAnnotationString(sStructure, IConstants.ANN_SPAN, 
+		if (span != null) {
+			this.addSAnnotationString(sStructure, IConstants.ANN_SPAN, 
 				span.replaceAll("\\\\", java.util.regex.Matcher.quoteReplacement("\\\\")));
+		}
 		
 								
 		// TODO add id as meta annotation
@@ -909,53 +909,41 @@ public class Perseus2SaltMapper extends DefaultHandler
 	}
 	
 	/**
-	 * If a transformation stylesheet has been provided
-	 * for the document, transform the result accordingly
-	 * @param a_text
-	 * @return the transformed text
-	 *         if no transformation is defined, the original
-	 *         text is returned unchanged 
+	 * Tranforms the treebank file to unicode
+	 * @param a_fileStr the path to the file
+	 * @return the transformed content
 	 */
-	private String transformText(String a_text)
+	public String transformText(String fileStr)
 	{
-		String transformed;
-		if (this.xsltSource != null)
-		{
-			StringWriter out = new StringWriter();
-			Result result = 				
-				new StreamResult(out);
-			TransformerFactory transFact =
-		        TransformerFactory.newInstance(  );
-			try {		
-	            
-//				Source dummyXmlSource = new StreamSource(new File("resources/dummy.xml"));
-				if (this.getResourcesURI()== null)	
-					throw new PerseusImporterException("Cannot import data, because the resource folder is not set.");
-				
-				File dummyXmlFile= new File(this.getResourcesURI().toFileString()+"/"+FILE_DUMMY_XSL);
-				if (!dummyXmlFile.exists())
-					throw new PerseusImporterException("Cannot import data, because a necessary resource file '"+dummyXmlFile.getAbsolutePath()+"' does not exist.");
-				Source dummyXmlSource = new StreamSource(dummyXmlFile);
-				
-			    Transformer trans =
-				    transFact.newTransformer(this.xsltSource);
-				trans.setParameter("e_in", a_text);
-				trans.transform(dummyXmlSource,result);
-			} catch (TransformerConfigurationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (TransformerException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		if (this.xsltSource == null) {
+			try {
+				this.xsltSource = 
+					new StreamSource(this.getClass().getClassLoader().getResourceAsStream(FILE_ALPHEIOS_XSL));
+			} catch (Exception a_e) {
+				throw new PerseusImporterException("Cannot import data, because a necessary resource file '"+FILE_ALPHEIOS_XSL+"' can't be found in the classpath.");
 			}
-			//this.log(LogService.LOG_DEBUG, "Transformed " + a_text + " to " + out);
-			transformed = out.toString();
 		}
-		else
-		{
-			transformed = a_text;
+		StringWriter out = new StringWriter();
+		Result result = 				
+				new StreamResult(out);
+		TransformerFactory transFact =
+		TransformerFactory.newInstance(  );
+		try {		
+	            
+			File file = new File(fileStr);
+			if (!file.exists())
+					throw new PerseusImporterException("Cannot import data, because the file '"+file.getAbsolutePath()+"' does not exist.");
+			Source xmlSource = new StreamSource(file);
+				
+			Transformer trans =
+				    transFact.newTransformer(this.xsltSource);
+				trans.transform(xmlSource,result);
+		} catch (TransformerConfigurationException e) {
+			throw new PerseusImporterException("Cannot import data, because unable to transform the source text",e);
+		} catch (TransformerException e) {
+			throw new PerseusImporterException("Cannot import data, because unable to transform the source text",e);
 		}
-		return transformed;
+		return out.toString();
 	}
 	
 	private SMetaAnnotation addSMetaAnnotationString(
