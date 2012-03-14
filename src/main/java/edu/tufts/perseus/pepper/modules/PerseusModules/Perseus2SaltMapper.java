@@ -112,7 +112,6 @@ public class Perseus2SaltMapper extends DefaultHandler
 
 //	private String KW_TOKENSEP="salt.tokenSeperator";	
 	public static final String DEFAULT_SEPARATOR= " ";
-	private String docLang = "";
 	private StreamSource xsltSource;
 	
 	public static final String FILE_ALPHEIOS_XSL="alpheios-beta2unicode.xsl";
@@ -132,11 +131,16 @@ public class Perseus2SaltMapper extends DefaultHandler
 		this.docList = new ArrayList<SDocument>();		
 	}
 	
+	/** 
+	 * Maps the character values of the POS tag components
+	 * to their position in the 14 character @postag attribute
+	 */
 	private static final HashMap<String,Integer> postagMap = 
 		new HashMap<String,Integer>()
 		{
 		private static final long serialVersionUID = -5308305950463962194L;
 		{
+			put(IConstants.ANN_POFS,new Integer(0));
 			put(IConstants.ANN_PERS,new Integer(1));			
 			put(IConstants.ANN_NUM,new Integer(2));
 			put(IConstants.ANN_TENSE,new Integer(3));
@@ -152,6 +156,10 @@ public class Perseus2SaltMapper extends DefaultHandler
 			put(IConstants.ANN_SORT,new Integer(13));
 		}};
 	
+	/**
+	 * Maps the character abbreviations for each postag
+	 * element to the full names 
+	 */
 	private static final HashMap<String,HashMap> abbrevMap 
 		= new HashMap<String,HashMap>()
 		{{
@@ -305,7 +313,8 @@ public class Perseus2SaltMapper extends DefaultHandler
 		while (dIter.hasNext())
 		{
 			SDocument doc = dIter.next();
-			this.addSMetaAnnotationString(a_sCorpus, IConstants.ANN_CORPUS_DOC+(++num), this.getDocName(doc));
+			this.addSMetaAnnotationString(a_sCorpus, 
+					IConstants.ANN_CORPUS_DOC+(++num), this.getDocName(doc));
 			// TODO - eventually add the document titles here too
 		}
 		Iterator<String> iter = this.allAnnotators.keySet().iterator();
@@ -313,7 +322,8 @@ public class Perseus2SaltMapper extends DefaultHandler
 		{
 			String key = iter.next();
 			String value = this.allAnnotators.get(key);
-			this.addSMetaAnnotationString(a_sCorpus, IConstants.ANN_CORPUS_ANNOTATOR +  key, value);			
+			this.addSMetaAnnotationString(a_sCorpus, 
+					IConstants.ANN_CORPUS_ANNOTATOR +  key, value);			
 		}					
 		this.initCorpus();
 	}
@@ -343,15 +353,15 @@ public class Perseus2SaltMapper extends DefaultHandler
 		this.currentText = "";
 		if (a_qName.equals("treebank"))
 		{
-			// create layer for syntactic annotation
+			// TODO 
 			// handle attributes: 
 			// schema
 			// lang
 			// date
-			this.docLang = a_atts.getValue("xml:lang");
 		}			
 		else if (a_qName.equals("annotator") && this.currentSentence == null)
 		{
+			// this is a new annotator, cache the info
 			this.currentAnnotatorInfo = new HashMap<String,String>();
 		}
 		else if (a_qName.equals("sentence"))
@@ -374,18 +384,20 @@ public class Perseus2SaltMapper extends DefaultHandler
 
 		if ("date".equals(a_qName))
 		{
-			java.text.DateFormat df = new java.text.SimpleDateFormat(IConstants.DATE_FORMAT);
+			java.text.DateFormat df = 
+				new java.text.SimpleDateFormat(IConstants.DATE_FORMAT, java.util.Locale.US);
 			try {				
 				// TODO add metadata annotation to layer instead of document
 				this.addDate(this.getDocument(), df.parse(this.currentText));
 			} catch (ParseException a_e)
 			{
 				if (this.getLogService()!= null)
-					this.getLogService().log(LogService.LOG_WARNING, "Unable to parse date " + currentText + ":",a_e);
-//				throw new SAXException("Unable to parse date " + currentText + ":",a_e);
+					this.getLogService().log(LogService.LOG_WARNING, "Date " + currentText + " is not in expected format " + IConstants.DATE_FORMAT);
+				// if we couldn't parse the date, add it anyway as a string
+				this.addDateString(this.getDocument(),this.currentText);
 			} catch (Exception e) {
 				if (this.getLogService()!= null)
-					this.getLogService().log(LogService.LOG_WARNING, "Unable to parse date " + currentText + ":",e);
+					this.getLogService().log(LogService.LOG_WARNING, "Unable to add date " + currentText + ":",e);
 			}
 		
 		}
@@ -530,6 +542,19 @@ public class Perseus2SaltMapper extends DefaultHandler
 		a_elem.addSMetaAnnotation(ann);
 	}
 	
+	/**
+	 * Add the Date String as an SMetaAnnotation 
+	 * @param a_elem the element to add it to
+	 * @param a_date the date string
+	 */
+	private void addDateString(SMetaAnnotatableElement a_elem,String a_date)
+	{
+		SMetaAnnotation ann = SaltFactory.eINSTANCE.createSMetaAnnotation();
+		ann.setNamespace(IConstants.NS);
+		ann.setSName(IConstants.ANN_DATE);
+		ann.setValue(a_date);
+		a_elem.addSMetaAnnotation(ann);
+	}
 		
 	/**
 	 * Create an Annotator MetaAnnotation
