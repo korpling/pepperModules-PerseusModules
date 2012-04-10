@@ -5,7 +5,7 @@
   <version>0.0.2-SNAPSHOT</version>
   <packaging>bundle</packaging>
   
-  <description>This project provides a Pepper importer and exporter for Perseus data.</description>
+  <description>The PerseusModules project provides an importer for mapping data from the Perseus format, used by the perseus project (see: http://nlp.perseus.tufts.edu/syntax/treebank/greek.html) to Salt.</description>
   <url>https://korpling.german.hu-berlin.de/p/projects/perseusmodules</url>
   <issueManagement>
   	<system>Redmine</system>
