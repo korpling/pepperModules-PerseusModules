@@ -34,10 +34,7 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.log.LogService;
 
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperExceptions.PepperModuleException;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.FormatDefinition;
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.PepperImporter;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.PepperInterfaceFactory;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.RETURNING_MODE;
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.impl.PepperImporterImpl;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SCorpus;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SCorpusGraph;
@@ -66,33 +63,10 @@ public class PerseusImporter extends PepperImporterImpl implements PepperImporte
 	public PerseusImporter()
 	{
 		super();
-		
-		{//setting name of module
-			//TODO /1/: change the name of the module, for example use the format name and the ending Importer (FORMATImporter)
-			this.name= "PerseusImporter";
-		}//setting name of module
-		
-		{//for testing the symbolic name has to be set without osgi
-			if (	(this.getSymbolicName()==  null) ||
-					(this.getSymbolicName().isEmpty()))
-				//TODO /2/: change the symbolic name to your symbolic name as in OSGI-Meta-Inf 
-				this.setSymbolicName("edu.tufts.perseus.pepperModules-PerseusModules");
-		}//for testing the symbolic name has to be set without osgi
-		
-		{//set list of formats supported by this module
-			this.supportedFormats= new BasicEList<FormatDefinition>();
-			FormatDefinition formatDef= PepperInterfaceFactory.eINSTANCE.createFormatDefinition();
-			//TODO /3/:change "sample" with format name
-			formatDef.setFormatName("Perseus");
-			//TODO /4/:change 1.0 with format version to support
-			formatDef.setFormatVersion("1.0");
-			this.supportedFormats.add(formatDef);
-		}
-		
-		{//just for logging: to say, that the current module has been loaded
-			if (this.getLogService()!= null)
-				this.getLogService().log(LogService.LOG_DEBUG,this.getName()+" is created...");
-		}//just for logging: to say, that the current module has been loaded
+		//set name of module
+		this.name= "AldtExporter";
+		//set list of formats supported by this module
+		this.addSupportedFormat("aldt", "1.0", null);
 		this.mapper= new Perseus2SaltMapper();
 	}
 	
