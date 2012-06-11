@@ -43,7 +43,7 @@ import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SElementId;
  * @version 1.0
  *
  */
-@Component(name="PerseusExporterComponent", factory="PerseusExporterComponentFactory")
+@Component(name="AldtExporterComponent", factory="PerseusExporterComponentFactory")
 @Service(value=PepperExporter.class)
 public class PerseusExporter extends PepperExporterImpl implements PepperExporter
 {

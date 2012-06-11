@@ -30,8 +30,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.log.LogService;
 
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperExceptions.PepperModuleException;
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.PepperImporter;
@@ -49,7 +47,7 @@ import edu.tufts.perseus.pepper.modules.PerseusModules.exceptions.PerseusImporte
  * @version 1.0
  *
  */
-@Component(name="EXMARaLDAImporterComponent", factory="PepperImporterComponentFactory")
+@Component(name="AldtImporterComponent", factory="PepperImporterComponentFactory")
 @Service(value=PepperImporter.class)
 public class PerseusImporter extends PepperImporterImpl implements PepperImporter
 {
@@ -64,7 +62,7 @@ public class PerseusImporter extends PepperImporterImpl implements PepperImporte
 	{
 		super();
 		//set name of module
-		this.name= "AldtExporter";
+		this.name= "AldtImporter";
 		//set list of formats supported by this module
 		this.addSupportedFormat("aldt", "1.0", null);
 		this.mapper= new Perseus2SaltMapper();
@@ -234,35 +232,4 @@ public class PerseusImporter extends PepperImporterImpl implements PepperImporte
 		//TODO /8/: implement this method when necessary 
 		super.end();
 	}
-	
-//================================ start: methods used by OSGi
-	/**
-	 * This method is called by the OSGi framework, when a component with this class as class-entry
-	 * gets activated.
-	 * @param componentContext OSGi-context of the current component
-	 */
-	protected void activate(ComponentContext componentContext) 
-	{
-		
-		//this.setSymbolicName(componentContext.getBundleContext().getBundle().getSymbolicName());
-		{//just for logging: to say, that the current module has been activated
-			if (this.getLogService()!= null)
-				this.getLogService().log(LogService.LOG_DEBUG,this.getName()+" is activated...");
-		}//just for logging: to say, that the current module has been activated
-		
-	}
-
-	/**
-	 * This method is called by the OSGi framework, when a component with this class as class-entry
-	 * gets deactivated.
-	 * @param componentContext OSGi-context of the current component
-	 */
-	protected void deactivate(ComponentContext componentContext) 
-	{
-		{//just for logging: to say, that the current module has been deactivated
-			if (this.getLogService()!= null)
-				this.getLogService().log(LogService.LOG_DEBUG,this.getName()+" is deactivated...");
-		}	
-	}
-//================================ start: methods used by OSGi
 }
