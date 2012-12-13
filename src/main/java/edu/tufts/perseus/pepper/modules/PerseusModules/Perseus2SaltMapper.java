@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.io.*;
 
-import javax.xml.transform.*;
 import javax.xml.transform.stream.*;
 
 import javax.xml.parsers.SAXParser;
@@ -39,6 +38,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import org.osgi.service.log.LogService;
 
 import org.eclipse.emf.common.util.URI;
+import org.apache.commons.lang.StringUtils;
 
 import de.hu_berlin.german.korpling.saltnpepper.salt.SaltFactory;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SCorpus;
@@ -106,7 +106,6 @@ public class Perseus2SaltMapper extends DefaultHandler
 	private HashMap<String,String> currentAnnotatorInfo = null;
 	private String currentText = null;			
 	private HashMap<String,SToken> tokenMap = null;
-	private HashMap<String,SStructure> ssMap = null;
 	private HashMap<String,ArrayList<HashMap<String,String>>> tokenRelMap = null;
 	private HashMap<String,String> allAnnotators = null;
 
@@ -492,8 +491,6 @@ public class Perseus2SaltMapper extends DefaultHandler
 		STextualDS sTextDS= SaltFactory.eINSTANCE.createSTextualDS();
 		this.setText(sTextDS);
 		this.sDocument.getSDocumentGraph().addSNode(sTextDS);
-		//this.addSMetaAnnotationString(
-		//	this.getDocument(), IConstants.ATT_DOCID, this.getDocument().getSId());
 		this.addSMetaAnnotationString(
 			this.getDocument(), 
 			IConstants.ANN_DOCUMENT_ID, 
@@ -589,36 +586,12 @@ public class Perseus2SaltMapper extends DefaultHandler
 	{		
 		
 
-		this.log(LogService.LOG_DEBUG, "Adding Word SStructure & Token");
-		SStructure sStructure= SaltFactory.eINSTANCE.createSStructure();
-		this.getDocument().getSDocumentGraph().addSNode(sStructure);		
-		SAnnotation ssAnno= SaltFactory.eINSTANCE.createSCatAnnotation();
-		ssAnno.setSValue(IConstants.ANN_WORD);
-		ssAnno.setNamespace(IConstants.NS);
-		sStructure.addSAnnotation(ssAnno);
+		this.log(LogService.LOG_DEBUG, "Starting Word");
 		
 		SToken sToken= SaltFactory.eINSTANCE.createSToken();
 		
 		// TODO add the word to the layer instead of document?
 		this.getDocument().getSDocumentGraph().addSNode(sToken);
-		
-		// Add the dominance relationship between the word token and the sStructure for it
-		SDominanceRelation sDomRel= SaltFactory.eINSTANCE.createSDominanceRelation();		
-		sDomRel.setSStructure(sStructure);
-		sDomRel.setSTarget(sToken);
-		SAnnotation dAnno= SaltFactory.eINSTANCE.createSAnnotation();
-		dAnno.setNamespace(IConstants.NS);
-		dAnno.setSName(IConstants.ANN_RELATION);
-		dAnno.setSValue(IConstants.ANN_WORD_TOKEN);
-		sDomRel.addSAnnotation(dAnno);
-		this.getDocument().getSDocumentGraph().addSRelation(sDomRel);		
-		
-		// Add a relationship between the word token and the sentence
-		//SSpanningRelation sSpanRel = SaltFactory.eINSTANCE.createSSpanningRelation();
-		//sSpanRel.setSSpan(this.currentSpan);
-		//sSpanRel.setTarget(sToken);						
-		//this.getDocument().getSDocumentGraph().addSRelation(sSpanRel);
-		//this.addSAnnotationString(sSpanRel, IConstants.ANN_RELATION, IConstants.ANN_RELATION_SPAN);		
 		
 		String postag = a_atts.getValue(IConstants.ATT_POSTAG);
 		String lemmaFull = a_atts.getValue(IConstants.ATT_LEMMA);
@@ -633,7 +606,11 @@ public class Perseus2SaltMapper extends DefaultHandler
 		String id = a_atts.getValue(IConstants.ATT_ID);
 		String cid = a_atts.getValue(IConstants.ATT_CID);
 		String head = a_atts.getValue(IConstants.ATT_HEAD);
+		String urn = a_atts.getValue(IConstants.ATT_CITE);
 		
+		if (urn != null && !urn.equalsIgnoreCase("")) {
+			this.addSAnnotationString(sToken, IConstants.ANN_CITE, urn);			
+		}
 		// TODO create CTS URN to word using id
 		this.addSAnnotationString(sToken, IConstants.ANN_WORD_ID, cid);
 		
@@ -691,19 +668,6 @@ public class Perseus2SaltMapper extends DefaultHandler
 			sToken.addSAnnotation(sAnno); 
 			this.log(LogService.LOG_DEBUG, "Added Lemma Annotation " + sAnno.getSValueSTEXT());
 			
-			// 2012-01-13 BALMAS : commenting this out for now because
-			// we are now transforming the entire file at startup to unicode without
-			// preserving betacode. If we really need the beta we can put it back in
-			// via the transform
-			//if (this.docLang != null && this.docLang.equals("grc"))
-			//{
-			//	SAnnotation bAnno = SaltFactory.eINSTANCE.createSLemmaAnnotation();	
-			//	bAnno.setSValue(lemma.replaceAll("\\\\", java.util.regex.Matcher.quoteReplacement("\\\\")));
-			//	bAnno.setNamespace(IConstants.NS);
-			//	bAnno.setName(IConstants.ANN_LEMMA_BETA);
-			//	sToken.addSAnnotation(bAnno); 
-			//	this.log(LogService.LOG_DEBUG, "Added Lemma-Beta Annotation " + bAnno.getSValueSTEXT());
-			//}
 		}
 		
 		if (sense != null && ! sense.isEmpty())
@@ -719,42 +683,27 @@ public class Perseus2SaltMapper extends DefaultHandler
 			sAnno.setNamespace(IConstants.NS);
 			sAnno.setName(IConstants.ATT_FORM);
 			sToken.addSAnnotation(sAnno); 
-			
-			// 2012-01-13 BALMAS : commenting this out for now because
-			// we are now transforming the entire file at startup to unicode without
-			// preserving betacode. If we really need the beta we can put it back in
-			// via the transform
-			//if (this.docLang != null && this.docLang.equals("grc"))
-			//{
-			//	SAnnotation bAnno = SaltFactory.eINSTANCE.createSAnnotation();								
-			//				
-			//	bAnno.setSValue(form.replaceAll("\\\\", java.util.regex.Matcher.quoteReplacement("\\\\")));
-			//	bAnno.setNamespace(IConstants.NS);
-			//	bAnno.setName(IConstants.ANN_FORM_BETA);
-			//	sToken.addSAnnotation(bAnno); 
-			//}
 		}
 		
 		// store the token, head and relation
-		this.ssMap.put(id, sStructure);
 		this.tokenMap.put(id, sToken);
-		
-		this.log(LogService.LOG_DEBUG, "Linking root word to sentence " + this.currentSentence.getSId());
-		// add dominance relationship between the word and the sentence
-		SDominanceRelation tDomRel= SaltFactory.eINSTANCE.createSDominanceRelation();		
-		tDomRel.setSStructure(this.currentSentence);
-		tDomRel.setSTarget(sStructure);
-		SAnnotation sAnno= SaltFactory.eINSTANCE.createSAnnotation();
-		sAnno.setNamespace(IConstants.NS);
-		sAnno.setSName(IConstants.ANN_RELATION);
-		sAnno.setSValue(relation);
-		tDomRel.addSAnnotation(sAnno);
-		this.getDocument().getSDocumentGraph().addSRelation(tDomRel);
-		this.log(LogService.LOG_DEBUG, "Linked root word to sentence " + this.currentSentence.getSId());
 		
 		if (!(head.equals("0")))
 		{
 			this.saveDependency(head, id, relation);
+		} else {
+			this.log(LogService.LOG_DEBUG, "Linking root word to sentence " + this.currentSentence.getSId());
+			// add dominance relationship between the word and the sentence
+			SDominanceRelation tDomRel= SaltFactory.eINSTANCE.createSDominanceRelation();		
+			tDomRel.setSStructure(this.currentSentence);
+			tDomRel.setSTarget(sToken);
+			SAnnotation sAnno= SaltFactory.eINSTANCE.createSAnnotation();
+			sAnno.setNamespace(IConstants.NS);
+			sAnno.setSName(IConstants.ANN_RELATION);
+			sAnno.setSValue(relation);
+			tDomRel.addSAnnotation(sAnno);
+			this.getDocument().getSDocumentGraph().addSRelation(tDomRel);
+			this.log(LogService.LOG_DEBUG, "Linked root word to sentence " + this.currentSentence.getSId());
 		}
 		//create an empty text, if there is none
 		if (this.getTextDS().getSText()== null)
@@ -805,36 +754,24 @@ public class Perseus2SaltMapper extends DefaultHandler
 		String subDoc = a_atts.getValue(IConstants.ATT_SUBDOC);
 		String span = a_atts.getValue(IConstants.ATT_SPAN);
 		String id = a_atts.getValue(IConstants.ATT_ID);
-
 		
-		//SSpan sSpan = SaltFactory.eINSTANCE.createSSpan();
-		//this.getDocument().getSDocumentGraph().addSNode(sSpan);
-		//this.currentSpan = sSpan;
-		//this.addSAnnotationString(sSpan,IConstants.ANN_SENTENCESPAN_ID,id);
-		
-		
-		// TODO use CTS URN 
-		
-		String[] parts = subDoc.split(":");
-		ArrayList<String> chunkList = new ArrayList<String>(); 
-		for (int i=0; i<parts.length; i++)
+		ArrayList<String> chunkIds = new ArrayList<String>();
+		String[] subdocs = subDoc.split(" ");
+		for (int i=0; i<subdocs.length; i++)
 		{
-			String[] pair = parts[i].split("=");
-			if (pair.length == 2)
-			{
-				chunkList.add(pair[1]);
+			String citeDoc = subdocs[i];
+			if (citeDoc.startsWith("urn:cts:")) {
+				// if we have a CTS urn as the subdoc, use it as-is
+				chunkIds.add(citeDoc);
+			} else {
+				// otherwise preface it with the docId
+				chunkIds.add(docId+":"+citeDoc);
 			}
 		}
-		String chunkId = docId;
-		Iterator<String> iter = chunkList.iterator();
-		while (iter.hasNext())
-		{ 
-			chunkId = chunkId + "." + iter.next();
-		}		 
 		this.addSAnnotationString(sStructure, IConstants.ANN_SENTENCE_ID, 
 				id);
 		this.addSAnnotationString(sStructure, IConstants.ANN_SUBDOC, 
-				chunkId);
+				StringUtils.join(chunkIds.toArray(),","));
 		if (span != null) {
 			this.addSAnnotationString(sStructure, IConstants.ANN_SPAN, 
 				span.replaceAll("\\\\", java.util.regex.Matcher.quoteReplacement("\\\\")));
@@ -843,7 +780,6 @@ public class Perseus2SaltMapper extends DefaultHandler
 								
 		// TODO add id as meta annotation
 		tokenMap = new HashMap<String,SToken>();
-		ssMap = new HashMap<String,SStructure>();
 		tokenRelMap = new HashMap<String,ArrayList<HashMap<String,String>>>();														
 	}
 	
@@ -933,43 +869,6 @@ public class Perseus2SaltMapper extends DefaultHandler
           }	
 	}
 	
-	/**
-	 * Tranforms the treebank file to unicode
-	 * @param a_fileStr the path to the file
-	 * @return the transformed content
-	 */
-	public String transformText(String fileStr)
-	{
-		if (this.xsltSource == null) {
-			try {
-				this.xsltSource = 
-					new StreamSource(this.getClass().getClassLoader().getResourceAsStream(FILE_ALPHEIOS_XSL));
-			} catch (Exception a_e) {
-				throw new PerseusImporterException("Cannot import data, because a necessary resource file '"+FILE_ALPHEIOS_XSL+"' can't be found in the classpath.");
-			}
-		}
-		StringWriter out = new StringWriter();
-		Result result = 				
-				new StreamResult(out);
-		TransformerFactory transFact =
-		TransformerFactory.newInstance(  );
-		try {		
-	            
-			File file = new File(fileStr);
-			if (!file.exists())
-					throw new PerseusImporterException("Cannot import data, because the file '"+file.getAbsolutePath()+"' does not exist.");
-			Source xmlSource = new StreamSource(file);
-				
-			Transformer trans =
-				    transFact.newTransformer(this.xsltSource);
-				trans.transform(xmlSource,result);
-		} catch (TransformerConfigurationException e) {
-			throw new PerseusImporterException("Cannot import data, because unable to transform the source text",e);
-		} catch (TransformerException e) {
-			throw new PerseusImporterException("Cannot import data, because unable to transform the source text",e);
-		}
-		return out.toString();
-	}
 	
 	private SMetaAnnotation addSMetaAnnotationString(
 			SMetaAnnotatableElement a_elem,String a_name, String a_value)

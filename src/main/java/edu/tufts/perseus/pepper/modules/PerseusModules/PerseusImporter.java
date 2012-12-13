@@ -65,6 +65,7 @@ public class PerseusImporter extends PepperImporterImpl implements PepperImporte
 		this.name= "AldtImporter";
 		//set list of formats supported by this module
 		this.addSupportedFormat("aldt", "1.0", null);
+		this.addSupportedFormat("aldt", "1.5", null);
 		this.mapper= new Perseus2SaltMapper();
 	}
 	
@@ -204,12 +205,10 @@ public class PerseusImporter extends PepperImporterImpl implements PepperImporte
 						mapper.setLogService(this.getLogService());
 						this.mapper.setDocument(sDoc);
 						this.mapper.setResourcesURI(this.getResources());
-						String text = this.mapper.transformText(documentPath.toFileString());
 			            SAXParserFactory factory = SAXParserFactory.newInstance();			            
 			            try {
 			            	SAXParser parser = factory.newSAXParser();
-				            parser.parse(new ByteArrayInputStream(text.getBytes("UTF-8")),
-				            		mapper);	
+				            parser.parse(documentPath.toFileString(),mapper);
 			            } catch (Exception a_e)
 			            {
 			            	throw new PerseusImporterException(

@@ -17,14 +17,12 @@
         <div><span class="caption">General  Information and Instructions:</span>
             <ul>
                 <li>Review the Tutorial in the <a href="http://annis.perseus.tufts.edu/Annis-web/search.html#">Annis Search interface</a> for general instructions on searching and using Annis.</li>                
-                <li>Word-level (CAT="W") annotations available for searching:
+                <li>token annotations available for searching:
                     <ul>                        
                         <li>POS</li>                        
                         <li>LEMMA</li>
-                        <li>lemma-beta</li>                        
                         <li>sense</li>                        
                         <li>form</li>
-                        <li>form-beta</li>
                         <li>case</li>
                         <li>number</li>
                         <li>gender</li>
@@ -33,7 +31,7 @@
                         <li>mood</li>                                                
                         <li>person</li>
                         <li>postag</li>
-                        <li>word_id</li>
+                        <li>cite</li>
                     </ul>
                 </li>                
                 <li>Sentence-level (CAT="S") annotations available for searching:
@@ -56,36 +54,46 @@
         <table><caption>Sample Queries and Search Tips</caption>
             <tr><th>Search</th><th>Query Syntax</th></tr>
             <tr>
-            	<td>Sentences with Optative Verbs</td>
+            	<td>Optative Verbs</td>
             	<td>mood="optative"</td>
             </tr>
             <tr>
             	<td>Neutral conditionals with εἰ (i.e., εἰ + indicative in protasis [if-clause], indicative in apodosis [then-clause])</td>
-            	<td>form-beta="ei)" & mood="indicative" & mood="indicative" & #1->parent #2 & #3 ->parent #1</td>
+                <td>form="εἰ" &amp; mood="indicative" &amp; mood="indicative" &amp; #1->parent #2 &amp; #3 ->parent #1</td>
             </tr>
               	<tr>
             	<td>Future less vivid conditionals with εἰ (i.e., εἰ + optative in protasis [if-clause], optative in apodosis [then-clause])</td>
-            	<td>form-beta="ei)" & mood="optative" & mood="optative" & #1->parent #2 & #3 ->parent #1</td>
+              	    <td>form-beta="εἰ" &amp; mood="optative" &amp; mood="optative" &amp; #1->parent #2 &amp; #3 ->parent #1</td>
             </tr>
             <tr>
-                <td>Sentences with Genitive Absolutes</td>
-                <td>case="genitive" &amp; word_id &amp; #2 ->parent[relation="SBJ"] #1 &amp; CAT="S" &amp; #3 _i_ #1</td>
+                <td>Genitive Absolutes</td>
+                <td>case="genitive" &amp; tok &amp; #2 ->parent[relation="SBJ"] #1</td>
             </tr>
             <tr>
                 <td>Substantival infinitives used as subjects</td>
-                 <td>mood="infinitive" &amp; POS="verb" &amp; #2 ->parent[relation="SBJ"] #1 &amp; CAT="S" &amp; #3 _i_ #1</td>
+                 <td>mood="infinitive" &amp; POS="verb" &amp; #2 ->parent[relation="SBJ"] #1</td>
             </tr>
             <tr>
-                <td>Sentences with Subject-Verb-Object word order</td>
-                <td>word_id &amp; word_id &amp; word_id &amp; #2 ->parent[relation="SBJ"] #1 &amp; #2 ->parent[relation="OBJ"] #3 &amp; #1 .* #2 &amp; #2 .* #3 &amp; CAT="S" &amp; #4 _i_ #1</td>
+                <td>Phrases with Subject-Verb-Object word order</td>
+                <td>tok &amp; tok &amp; tok &amp; #2 ->parent[relation="SBJ"] #1 &amp; #2 ->parent[relation="OBJ"] #3 &amp; #1 .* #2 &amp; #2 .* #3</td>
             </tr>
             <tr>
-                <td>Sentences with Subject-Object-Verb word order</td>
-                <td>word_id &amp; word_id &amp; word_id &amp; #3 ->parent[relation="SBJ"] #1 &amp; #3 ->parent[relation="OBJ"] #2 &amp; #1 .* #2 &amp; #2 .* #3 &amp; CAT="S" &amp; #4 _i_ #1</td>
+                <td>Phrases with Subject-Object-Verb word order</td>
+                <td>tok &amp; tok &amp; tok &amp; #3 ->parent[relation="SBJ"] #1 &amp; #3 ->parent[relation="OBJ"] #2 &amp; #1 .* #2 &amp; #2 .* #3</td>
+            </tr>
+            <tr>
+                <td>Indicative verbs with accusative objects where the verb is that of a main clause</td>
+                <td>POS="verb" &amp; mood="indicative" &amp; #1_=_#2 &amp; case= "accusative" &amp; #1->parent[relation="OBJ"] #3 &amp; #1 .* #3 &amp; CAT="S" &amp; #4 > #1
+                </td>
+            </tr>
+            <tr>
+                <td>Limit results to words at the root of the sentence (i.e. words which aren't dependendent on any others in the sentence)</td>
+                <td>Append to the query: CAT="S" &amp; #N > #1 (where #N is the argument number of CAT)</td>
             </tr>            
             <tr>
                 <td>Limit results to the enclosing sentence?</td>
-                <td>Append to the query: CAT="S" &amp; #N _i_ #1 (where #N is the argument number of CAT) and select 0 for left and right context</td>
+                <td>It isn't possible to do this specifically with the latest load of the data, but you can use the context dropdowns at the left to select 
+                    more or less context at the left and right of the search results until the full sentence is displayed.</td>
             </tr>
             <tr>
                 <td>
@@ -102,11 +110,7 @@
             </tr>
             <tr>            
                 <td>Search for any word</td>
-                 <td>CAT="W" or just word_id</td>
-            </tr>
-            <tr>            
-                <td>Search using beta-code</td>
-                <td>Use the lemma-beta and/or form-beta annotations</td>
+                 <td>tok</td>
             </tr>
         </table>
         </div>            

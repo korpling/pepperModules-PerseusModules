@@ -32,6 +32,8 @@ public interface IConstants {
 	public static final String ATT_SECONDARY = "secondary";
 	public static final String ATT_LEMMA = "lemma";	
 	public static final String ATT_FORM = "form";
+	public static final String ATT_CITE = "cite";
+	
 	
 	public static final String ATT_RELATION = "relation";
 	public static final String ATT_ID = "id";
@@ -50,6 +52,8 @@ public interface IConstants {
 	public static final String ANN_DOCUMENT_ID = "DOCUMENT_ID";
 	public static final String ANN_CORPUS_DOC = "CORPUS_DOC";
 	public static final String ANN_WORD_ID = "word_id";
+	public static final String ANN_CITE = "cite";
+
 	
 	public static final String ANN_REL_TYPE_CHILD = "child";
 	public static final String ANN_REL_TYPE_PARENT = "parent";
