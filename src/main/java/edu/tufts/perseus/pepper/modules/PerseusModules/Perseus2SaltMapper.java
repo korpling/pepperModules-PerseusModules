@@ -622,7 +622,7 @@ public class Perseus2SaltMapper extends DefaultHandler
 			this.addSAnnotationString(sToken, IConstants.ANN_URN, urn);	
 			if (this.citation_base_uri != null) {
 				this.addSAnnotationString(sToken, IConstants.ANN_CITE, 
-						"<a href='" + this.citation_base_uri + urn + "'>" + 
+						"<a href='" + this.citation_base_uri + urn + "' target='_blank'>" + 
 						IConstants.ANN_CITE_LINK_TEXT + "</a>");
 			}
 		}
