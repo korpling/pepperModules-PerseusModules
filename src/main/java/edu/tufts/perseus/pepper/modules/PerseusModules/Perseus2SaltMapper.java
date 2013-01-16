@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Properties;
 import java.io.*;
 
 import javax.xml.transform.stream.*;
@@ -112,6 +113,7 @@ public class Perseus2SaltMapper extends DefaultHandler
 //	private String KW_TOKENSEP="salt.tokenSeperator";	
 	public static final String DEFAULT_SEPARATOR= " ";
 	private StreamSource xsltSource;
+	private String citation_base_uri = null;
 	
 	public static final String FILE_ALPHEIOS_XSL="alpheios-beta2unicode.xsl";
 	public static final String FILE_DUMMY_XSL="dummy.xml";
@@ -474,6 +476,14 @@ public class Perseus2SaltMapper extends DefaultHandler
 	}
 	
 	/**
+	 * Set the special properties
+	 */
+	public void setProps(Properties a_props) {
+		if (a_props != null) {
+			citation_base_uri = a_props.getProperty(IConstants.PROP_CITATION_BASE_URI);
+		}
+	}
+	/**
 	 * Set the SDocument
 	 */
 	public void setDocument(SDocument a_sDocument) {
@@ -609,7 +619,12 @@ public class Perseus2SaltMapper extends DefaultHandler
 		String urn = a_atts.getValue(IConstants.ATT_CITE);
 		
 		if (urn != null && !urn.equalsIgnoreCase("")) {
-			this.addSAnnotationString(sToken, IConstants.ANN_CITE, urn);			
+			this.addSAnnotationString(sToken, IConstants.ANN_URN, urn);	
+			if (this.citation_base_uri != null) {
+				this.addSAnnotationString(sToken, IConstants.ANN_CITE, 
+						"<a href='" + this.citation_base_uri + urn + "'>" + 
+						IConstants.ANN_CITE_LINK_TEXT + "</a>");
+			}
 		}
 		// TODO create CTS URN to word using id
 		this.addSAnnotationString(sToken, IConstants.ANN_WORD_ID, cid);

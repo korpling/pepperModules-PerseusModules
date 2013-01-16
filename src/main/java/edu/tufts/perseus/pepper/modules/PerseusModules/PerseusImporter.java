@@ -18,9 +18,12 @@
 package edu.tufts.perseus.pepper.modules.PerseusModules;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -57,6 +60,7 @@ public class PerseusImporter extends PepperImporterImpl implements PepperImporte
 	 */
 	private Map<SElementId, URI> documentResourceTable= null;
 	private Perseus2SaltMapper mapper = null;
+	private Properties props;
 	
 	public PerseusImporter()
 	{
@@ -126,6 +130,27 @@ public class PerseusImporter extends PepperImporterImpl implements PepperImporte
 						" because some exception occurs: ",e);
 			}
 		}	 	
+	}
+	
+	/**
+	 * Extracts properties out of given special parameters.
+	 */
+	private void extractProperties()
+	{
+		if (this.getSpecialParams()!= null)
+		{
+			// properties file identified in special params
+			// can be used to set the citation base uri to include links
+			// to the annotated source texts
+			File propFile= new File(this.getSpecialParams().toFileString());
+			this.props= new Properties();
+			try{
+				this.props.load(new FileInputStream(propFile));
+			}catch (Exception e)
+			{
+				throw new PerseusImporterException("Cannot find input file for properties: "+propFile+"\n nested exception: "+ e.getMessage());
+			}
+		} 
 	}
 	
 	/**
@@ -202,9 +227,11 @@ public class PerseusImporter extends PepperImporterImpl implements PepperImporte
 				{
 					SDocument sDoc= (SDocument) sElementId.getSIdentifiableElement();
 					{	
+						this.extractProperties();
 						mapper.setLogService(this.getLogService());
 						this.mapper.setDocument(sDoc);
 						this.mapper.setResourcesURI(this.getResources());
+						this.mapper.setProps(this.props);
 			            SAXParserFactory factory = SAXParserFactory.newInstance();			            
 			            try {
 			            	SAXParser parser = factory.newSAXParser();

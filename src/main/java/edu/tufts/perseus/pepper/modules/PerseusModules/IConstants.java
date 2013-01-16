@@ -53,7 +53,9 @@ public interface IConstants {
 	public static final String ANN_CORPUS_DOC = "CORPUS_DOC";
 	public static final String ANN_WORD_ID = "word_id";
 	public static final String ANN_CITE = "cite";
-
+	public static final String ANN_CITE_LINK_TEXT = "Text";
+	public static final String ANN_URN = "urn";
+	
 	
 	public static final String ANN_REL_TYPE_CHILD = "child";
 	public static final String ANN_REL_TYPE_PARENT = "parent";
@@ -192,6 +194,9 @@ public interface IConstants {
 	public static final String PFX_RES = "resultative+";
 	public static final String SORT_CARD = "cardinal";
 	public static final String SORT_ORD = "ordinal";
+	
+	public static final String PROP_CITATION_BASE_URI = "citation_base_uri";
+
 
 	// Dummy for transform
 	 // an identity copy stylesheet
