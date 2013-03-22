@@ -17,9 +17,8 @@
  */
 package edu.tufts.perseus.pepper.modules.PerseusModules;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Component;
 
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperExceptions.PepperModuleException;
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.PepperExporter;
@@ -44,7 +43,6 @@ import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SElementId;
  *
  */
 @Component(name="AldtExporterComponent", factory="PerseusExporterComponentFactory")
-@Service(value=PepperExporter.class)
 public class PerseusExporter extends PepperExporterImpl implements PepperExporter
 {
 	public PerseusExporter()
