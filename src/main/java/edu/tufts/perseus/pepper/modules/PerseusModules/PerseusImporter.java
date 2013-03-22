@@ -17,7 +17,6 @@
  */
 package edu.tufts.perseus.pepper.modules.PerseusModules;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -28,11 +27,10 @@ import java.util.Properties;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
+import org.osgi.service.component.annotations.Component;
 
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperExceptions.PepperModuleException;
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.PepperImporter;
@@ -51,7 +49,6 @@ import edu.tufts.perseus.pepper.modules.PerseusModules.exceptions.PerseusImporte
  *
  */
 @Component(name="AldtImporterComponent", factory="PepperImporterComponentFactory")
-@Service(value=PepperImporter.class)
 public class PerseusImporter extends PepperImporterImpl implements PepperImporter
 {
 	
