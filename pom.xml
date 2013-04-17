@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.tufts.perseus</groupId>
   <artifactId>pepperModules-PerseusModules</artifactId>
-  <version>0.0.4-SNAPSHOT</version>
+  <version>0.0.3-SNAPSHOT</version>
   <packaging>bundle</packaging>
   
   <description>The PerseusModules project provides an importer for mapping data from the Perseus format, used by the perseus project (see: http://nlp.perseus.tufts.edu/syntax/treebank/greek.html) to Salt.</description>
@@ -59,7 +59,7 @@
            https://korpling.german.hu-berlin.de/svn/saltnpepper/PepperModules/PerseusModules/tags/
           </tagBase>
           <releaseProfiles>release</releaseProfiles>
-          <goals>assembly:single deploy</goals>
+          <goals>package assembly:single deploy</goals>
         </configuration>
       </plugin>
       <!-- start: creation of bundle jar -->
