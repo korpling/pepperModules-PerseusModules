@@ -19,16 +19,12 @@ package edu.tufts.perseus.pepper.modules.PerseusModules;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Properties;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.eclipse.emf.common.util.BasicEList;
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.osgi.service.component.annotations.Component;
 
@@ -36,7 +32,6 @@ import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperExceptions.PepperMo
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.PepperImporter;
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.impl.PepperImporterImpl;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SCorpus;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SCorpusGraph;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SDocument;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SElementId;
 import edu.tufts.perseus.pepper.modules.PerseusModules.exceptions.PerseusImporterException;
@@ -67,66 +62,8 @@ public class PerseusImporter extends PepperImporterImpl implements PepperImporte
 		//set list of formats supported by this module
 		this.addSupportedFormat("aldt", "1.0", null);
 		this.addSupportedFormat("aldt", "1.5", null);
+		getSDocumentEndings().add(PepperImporter.ENDING_XML);
 		this.mapper= new Perseus2SaltMapper();
-	}
-	
-	
-	/**
-	 * This method is called by Pepper at the start of conversion process. 
-	 * It shall create the structure the corpus to import. 
-	 * That means creating all necessary SCorpus, 
-	 * SDocument and all Relation-objects between them. The path to 
-	 * the corpus to import is given by this.getCorpusDefinition().getCorpusPath().
-	 * @param an empty graph given by Pepper, which shall contains the corpus structure
-	 */
-	@Override
-	public void importCorpusStructure(SCorpusGraph corpusGraph)
-			throws PepperModuleException 
-	{
-		//this.setSCorpusGraph(corpusGraph);
-		if (this.getSCorpusGraph()== null)
-			throw new PerseusImporterException(
-				this.name + 
-				": Cannot start with importing corpus, " + 
-				"because salt project is not set.");
-		
-		if (this.getCorpusDefinition()== null)
-			throw new PerseusImporterException(
-				this.name + 
-				": Cannot start with importing corpus, " + 
-				"because no corpus definition to import is given.");
-		
-		if (this.getCorpusDefinition().getCorpusPath()== null)
-			throw new PerseusImporterException(
-				this.name + 
-				": Cannot start with importing corpus, " + 
-				"because the path of given corpus definition is null.");		
-		if (this.getCorpusDefinition().getCorpusPath().isFile())
-		{
-			this.documentResourceTable = new Hashtable<SElementId, URI>();
-
-			// clean uri in corpus path (if it is a folder and ends with /, 
-			// / has to be removed)
-			if ( (this.getCorpusDefinition().getCorpusPath().toFileString().endsWith("/")) || 
-				 (this.getCorpusDefinition().getCorpusPath().toFileString().endsWith("\\")))
-			{
-				this.getCorpusDefinition().setCorpusPath(this.getCorpusDefinition().getCorpusPath().trimSegments(1));
-			}
-			try {
-				EList<String> endings= new BasicEList<String>();
-				endings.add("xml");
-				this.documentResourceTable = 
-					this.createCorpusStructure(
-							this.getCorpusDefinition().getCorpusPath(), 
-							null, 
-							endings);
-			} catch (IOException e) {
-				throw new PerseusImporterException(
-						this.name + 
-						": Cannot start with importing corpus, "  + 
-						" because some exception occurs: ",e);
-			}
-		}	 	
 	}
 	
 	/**
