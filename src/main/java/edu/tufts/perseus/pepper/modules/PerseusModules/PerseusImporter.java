@@ -45,12 +45,7 @@ import edu.tufts.perseus.pepper.modules.PerseusModules.exceptions.PerseusImporte
  */
 @Component(name="AldtImporterComponent", factory="PepperImporterComponentFactory")
 public class PerseusImporter extends PepperImporterImpl implements PepperImporter
-{
-	
-	/**
-	 * Stores relation between documents and their resource 
-	 */
-	private Map<SElementId, URI> documentResourceTable= null;
+{	
 	private Perseus2SaltMapper mapper = null;
 	private Properties props;
 	
@@ -155,8 +150,8 @@ public class PerseusImporter extends PepperImporterImpl implements PepperImporte
 			}
 			//if elementId belongs to SDocument
 			else if((sElementId.getSIdentifiableElement() instanceof SDocument))
-			{					
-				URI documentPath= this.documentResourceTable.get(sElementId);
+			{			
+				URI documentPath= getSElementId2ResourceTable().get(sElementId);
 				if (documentPath!= null)
 				{
 					SDocument sDoc= (SDocument) sElementId.getSIdentifiableElement();
