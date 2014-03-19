@@ -17,36 +17,34 @@
  */
 package edu.tufts.perseus.pepper.modules.PerseusModules;
 
-import java.lang.String;
+import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
-import java.io.*;
-
-import javax.xml.transform.stream.*;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.stream.StreamSource;
 
+import org.apache.commons.lang.StringUtils;
+import org.eclipse.emf.common.util.URI;
+import org.osgi.service.log.LogService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import org.osgi.service.log.LogService;
-
-import org.eclipse.emf.common.util.URI;
-import org.apache.commons.lang.StringUtils;
-
+import de.hu_berlin.german.korpling.saltnpepper.pepper.modules.exceptions.PepperModuleException;
 import de.hu_berlin.german.korpling.saltnpepper.salt.SaltFactory;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SCorpus;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SDocument;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SDominanceRelation;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SPointingRelation;
-//import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SSpan;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SStructure;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.STextualDS;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.STextualRelation;
@@ -57,10 +55,11 @@ import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SMetaAnnotatableEl
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SMetaAnnotation;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SProcessingAnnotatableElement;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SProcessingAnnotation;
-import edu.tufts.perseus.pepper.modules.PerseusModules.exceptions.PerseusImporterException;
 
 public class Perseus2SaltMapper extends DefaultHandler  
 {
+	private static final Logger logger= LoggerFactory.getLogger(Perseus2SaltMapper.class);
+	
 	private URI resourcesURI= null;
 	
 	/**
@@ -78,26 +77,6 @@ public class Perseus2SaltMapper extends DefaultHandler
 	public URI getResourcesURI() {
 		return resourcesURI;
 	}
-	
-	private LogService logService= null;
-	/**
-	 * Set the Log Service
-	 * @param a_log a {@link LogService} object which with should be logged
-	 */
-	public void setLogService(LogService a_log)
-	{
-		this.logService = a_log;
-	}
-	
-	/**
-	 * Returns the Log Service
-	 * @return current {@link LogService} object
-	 */
-	public LogService getLogService()
-	{
-		return(this.logService);
-	}
-
 	
 //	private SCorpus sCorpus = null;
 	private ArrayList<SDocument> docList = null;
@@ -392,13 +371,11 @@ public class Perseus2SaltMapper extends DefaultHandler
 				this.addDate(this.getDocument(), df.parse(this.currentText));
 			} catch (ParseException a_e)
 			{
-				if (this.getLogService()!= null)
-					this.getLogService().log(LogService.LOG_WARNING, "Date " + currentText + " is not in expected format " + IConstants.DATE_FORMAT);
+				logger.warn("Date " + currentText + " is not in expected format " + IConstants.DATE_FORMAT);
 				// if we couldn't parse the date, add it anyway as a string
 				this.addDateString(this.getDocument(),this.currentText);
 			} catch (Exception e) {
-				if (this.getLogService()!= null)
-					this.getLogService().log(LogService.LOG_WARNING, "Unable to add date " + currentText + ":",e);
+				logger.warn("Unable to add date " + currentText + ":",e);
 			}
 		
 		}
@@ -490,13 +467,13 @@ public class Perseus2SaltMapper extends DefaultHandler
 		this.initDocument();
 		this.sDocument = a_sDocument;
 		this.docList.add(a_sDocument);
-		this.log(LogService.LOG_DEBUG, "Creating DocumentGraph for " + this.getDocument().getSId());
+		logger.debug("Creating DocumentGraph for " + this.getDocument().getSId());
 		this.sDocument.setSDocumentGraph(SaltFactory.eINSTANCE.createSDocumentGraph());
 		String name = this.getDocName(a_sDocument);
 		this.sDocument.getSDocumentGraph().setSName(name);
 		this.sDocument.getSDocumentGraph().setSId(this.getDocument().getSId());
 	
-		this.log(LogService.LOG_DEBUG, "Adding TextDS");
+		logger.debug("Adding TextDS");
 		// TODO not sure if we want to associate a primary text element or not...
 		STextualDS sTextDS= SaltFactory.eINSTANCE.createSTextualDS();
 		this.setText(sTextDS);
@@ -596,7 +573,7 @@ public class Perseus2SaltMapper extends DefaultHandler
 	{		
 		
 
-		this.log(LogService.LOG_DEBUG, "Starting Word");
+		logger.debug("Starting Word");
 		
 		SToken sToken= SaltFactory.eINSTANCE.createSToken();
 		
@@ -631,7 +608,7 @@ public class Perseus2SaltMapper extends DefaultHandler
 		
 		if (postag != null && !(postag.equalsIgnoreCase("")))
 		{
-			this.log(LogService.LOG_DEBUG, "Adding POSTAG annotation");
+			logger.debug("Adding POSTAG annotation");
 			// Add as-is as annotation on token
 			SAnnotation sAnno = SaltFactory.eINSTANCE.createSAnnotation();
 			sAnno.setNamespace(IConstants.NS);
@@ -644,7 +621,7 @@ public class Perseus2SaltMapper extends DefaultHandler
 			String pos = postag.substring(0, 1);
 			if (!pos.equals(IConstants.EMPTY))
 			{
-				this.log(LogService.LOG_DEBUG, "Adding POFS annotation");
+				logger.debug("Adding POFS annotation");
 				pAnno.setSValue(this.getLongString(IConstants.ANN_POFS,pos));
 				sToken.addSAnnotation(pAnno);
 			}
@@ -664,7 +641,7 @@ public class Perseus2SaltMapper extends DefaultHandler
 				}
 				if (value != null && ! value.equals(IConstants.EMPTY))
 				{
-					this.log(LogService.LOG_DEBUG, "Adding annotation: " + key + "=" + value);
+					logger.debug("Adding annotation: " + key + "=" + value);
 					sAnno = SaltFactory.eINSTANCE.createSAnnotation();				
 					sAnno.setNamespace(IConstants.NS);
 					sAnno.setName(key);				
@@ -681,7 +658,7 @@ public class Perseus2SaltMapper extends DefaultHandler
 			sAnno.setSValue(lemma);
 			sAnno.setNamespace(IConstants.NS);
 			sToken.addSAnnotation(sAnno); 
-			this.log(LogService.LOG_DEBUG, "Added Lemma Annotation " + sAnno.getSValueSTEXT());
+			logger.debug("Added Lemma Annotation " + sAnno.getSValueSTEXT());
 			
 		}
 		
@@ -692,7 +669,7 @@ public class Perseus2SaltMapper extends DefaultHandler
 		
 		if (form != null && ! form.isEmpty())
 		{
-			this.log(LogService.LOG_DEBUG, "Adding Form Annotation");
+			logger.debug("Adding Form Annotation");
 			SAnnotation sAnno = SaltFactory.eINSTANCE.createSAnnotation();														
 			sAnno.setSValue(form);
 			sAnno.setNamespace(IConstants.NS);
@@ -707,7 +684,7 @@ public class Perseus2SaltMapper extends DefaultHandler
 		{
 			this.saveDependency(head, id, relation);
 		} else {
-			this.log(LogService.LOG_DEBUG, "Linking root word to sentence " + this.currentSentence.getSId());
+			logger.debug("Linking root word to sentence " + this.currentSentence.getSId());
 			// add dominance relationship between the word and the sentence
 			SDominanceRelation tDomRel= SaltFactory.eINSTANCE.createSDominanceRelation();		
 			tDomRel.setSStructure(this.currentSentence);
@@ -718,7 +695,7 @@ public class Perseus2SaltMapper extends DefaultHandler
 			sAnno.setSValue(relation);
 			tDomRel.addSAnnotation(sAnno);
 			this.getDocument().getSDocumentGraph().addSRelation(tDomRel);
-			this.log(LogService.LOG_DEBUG, "Linked root word to sentence " + this.currentSentence.getSId());
+			logger.debug("Linked root word to sentence " + this.currentSentence.getSId());
 		}
 		//create an empty text, if there is none
 		if (this.getTextDS().getSText()== null)
@@ -755,7 +732,7 @@ public class Perseus2SaltMapper extends DefaultHandler
 	 */
 	private void startSentence(Attributes a_atts)
 	{	
-		this.log(LogService.LOG_DEBUG, "Adding Sentence " + a_atts.getValue("id"));
+		logger.debug("Adding Sentence " + a_atts.getValue("id"));
 		SStructure sStructure= SaltFactory.eINSTANCE.createSStructure();
 		this.getDocument().getSDocumentGraph().addSNode(sStructure);
 		this.currentSentence = sStructure;		
@@ -825,7 +802,7 @@ public class Perseus2SaltMapper extends DefaultHandler
 	private void setDependency(String a_source)
 	{		
 		SToken parent = this.tokenMap.get(a_source);
-		this.log(LogService.LOG_DEBUG, "Adding Token Dependency:" + a_source);	
+		logger.debug("Adding Token Dependency:" + a_source);	
 		ArrayList<HashMap<String,String>> rels = this.tokenRelMap.get(a_source);
 		if (rels != null)
 		{
@@ -841,7 +818,7 @@ public class Perseus2SaltMapper extends DefaultHandler
 					sRel.addSType(IConstants.ANN_REL_TYPE_PARENT);
 					sRel.setSSource(parent);	
 					this.getDocument().getSDocumentGraph().addSRelation(sRel);		
-					this.log(LogService.LOG_DEBUG, "Adding Dependency Relation: " + (String)relMap.get(key) + " " + a_source + " to " + key + " node " + this.tokenMap.get(key));
+					logger.debug("Adding Dependency Relation: " + (String)relMap.get(key) + " " + a_source + " to " + key + " node " + this.tokenMap.get(key));
 					sRel.setSTarget((SToken)this.tokenMap.get(key));		
 					SAnnotation sAnno= SaltFactory.eINSTANCE.createSAnnotation();
 					sAnno.setNamespace(IConstants.NS);
@@ -850,18 +827,6 @@ public class Perseus2SaltMapper extends DefaultHandler
 					sRel.addSAnnotation(sAnno);
 				}
 			}
-		}
-	}
-	
-	private void log(int a_level, String a_msg)
-	{
-		if (this.logService != null)
-		{
-			this.logService.log(a_level, a_msg);
-		}
-		else
-		{
-			System.err.println(a_msg);
 		}
 	}
 	
@@ -879,7 +844,7 @@ public class Perseus2SaltMapper extends DefaultHandler
 	            parser.parse(documentPath,mapper);	
           } catch (Exception a_e)
           {
-          	throw new PerseusImporterException(
+          	throw new PepperModuleException(
           			"Unable to parse " + documentPath + ":",a_e);
           }	
 	}
