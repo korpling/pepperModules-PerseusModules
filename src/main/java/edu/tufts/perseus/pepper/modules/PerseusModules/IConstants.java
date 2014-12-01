@@ -201,13 +201,4 @@ public interface IConstants {
 	// Dummy for transform
 	 // an identity copy stylesheet
     public static final String DUMMY = "<root></root>";
-  
-
-
-	
-	
-	
-	
-	
-	
 }
