@@ -50,6 +50,9 @@ public class PerseusImporter extends PepperImporterImpl implements PepperImporte
 		super();
 		//set name of module
 		this.setName("AldtImporter");
+		setSupplierContact(URI.createURI("saltnpepper@lists.hu-berlin.de"));
+		setSupplierHomepage(URI.createURI("https://github.com/korpling/pepperModules-PerseusModules"));
+		setDesc("This importer transforms data in aldt format used in the Perseus project to a Salt model. ");
 		//set list of formats supported by this module
 		this.addSupportedFormat("aldt", "1.0", null);
 		this.addSupportedFormat("aldt", "1.5", null);
