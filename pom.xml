@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.tufts.perseus</groupId>
 	<artifactId>pepperModules-PerseusModules</artifactId>
-	<version>0.0.8</version>
+	<version>0.0.9-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 	<description>The PerseusModules project provides an importer for mapping data from the Perseus format, used by the perseus project (see: http://nlp.perseus.tufts.edu/syntax/treebank/greek.html) to Salt.</description>
 	<url>https://korpling.german.hu-berlin.de/p/projects/perseusmodules</url>
