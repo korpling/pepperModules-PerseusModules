@@ -22,15 +22,14 @@ import java.util.Properties;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.corpus_tools.pepper.impl.PepperImporterImpl;
+import org.corpus_tools.pepper.modules.PepperImporter;
+import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
+import org.corpus_tools.salt.common.SCorpus;
+import org.corpus_tools.salt.common.SDocument;
+import org.corpus_tools.salt.graph.Identifier;
 import org.eclipse.emf.common.util.URI;
 import org.osgi.service.component.annotations.Component;
-
-import de.hu_berlin.german.korpling.saltnpepper.pepper.modules.PepperImporter;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.modules.exceptions.PepperModuleException;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.modules.impl.PepperImporterImpl;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SCorpus;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SDocument;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SElementId;
 
 
 /**
@@ -54,9 +53,9 @@ public class PerseusImporter extends PepperImporterImpl implements PepperImporte
 		setSupplierHomepage(URI.createURI("https://github.com/korpling/pepperModules-PerseusModules"));
 		setDesc("This importer transforms data in aldt format used in the Perseus project to a Salt model. ");
 		//set list of formats supported by this module
-		this.addSupportedFormat("aldt", "1.0", null);
-		this.addSupportedFormat("aldt", "1.5", null);
-		getSDocumentEndings().add(PepperImporter.ENDING_XML);
+		addSupportedFormat("aldt", "1.0", null);
+		addSupportedFormat("aldt", "1.5", null);
+		getDocumentEndings().add(PepperImporter.ENDING_XML);
 		this.mapper= new Perseus2SaltMapper();
 	}
 	
@@ -68,30 +67,30 @@ public class PerseusImporter extends PepperImporterImpl implements PepperImporte
 	 * @param sElementId the id value for the current document or corpus to process  
 	 */
 	@Override
-	public void start(SElementId sElementId) throws PepperModuleException 
+	public void start(Identifier sElementId) throws PepperModuleException 
 	{
 		if (	(sElementId!= null) &&
-				(sElementId.getSIdentifiableElement()!= null) &&
-				((sElementId.getSIdentifiableElement() instanceof SDocument) ||
-				((sElementId.getSIdentifiableElement() instanceof SCorpus))))
+				(sElementId.getIdentifiableElement()!= null) &&
+				((sElementId.getIdentifiableElement() instanceof SDocument) ||
+				((sElementId.getIdentifiableElement() instanceof SCorpus))))
 		{
 			
-			if (sElementId.getSIdentifiableElement() instanceof SCorpus)
+			if (sElementId.getIdentifiableElement() instanceof SCorpus)
 			{
 
-				SCorpus sCorpus= (SCorpus) sElementId.getSIdentifiableElement();
+				SCorpus sCorpus= (SCorpus) sElementId.getIdentifiableElement();
 				{					
 					//Corpus corpus = new Corpus(documentPath.toFileString());											
 					mapper.setCorpus(sCorpus);											
 				}
 			}
 			//if elementId belongs to SDocument
-			else if((sElementId.getSIdentifiableElement() instanceof SDocument))
+			else if((sElementId.getIdentifiableElement() instanceof SDocument))
 			{			
-				URI documentPath= getSElementId2ResourceTable().get(sElementId);
+				URI documentPath= getIdentifier2ResourceTable().get(sElementId);
 				if (documentPath!= null)
 				{
-					SDocument sDoc= (SDocument) sElementId.getSIdentifiableElement();
+					SDocument sDoc= (SDocument) sElementId.getIdentifiableElement();
 					{	
 						this.mapper.setDocument(sDoc);
 						this.mapper.setResourcesURI(this.getResources());

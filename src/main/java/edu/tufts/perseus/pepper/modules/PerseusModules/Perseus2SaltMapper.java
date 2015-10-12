@@ -31,29 +31,26 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
+import org.corpus_tools.salt.SaltFactory;
+import org.corpus_tools.salt.common.SCorpus;
+import org.corpus_tools.salt.common.SDocument;
+import org.corpus_tools.salt.common.SDominanceRelation;
+import org.corpus_tools.salt.common.SPointingRelation;
+import org.corpus_tools.salt.common.SStructure;
+import org.corpus_tools.salt.common.STextualDS;
+import org.corpus_tools.salt.common.STextualRelation;
+import org.corpus_tools.salt.common.SToken;
+import org.corpus_tools.salt.core.SAnnotation;
+import org.corpus_tools.salt.core.SAnnotationContainer;
+import org.corpus_tools.salt.core.SMetaAnnotation;
+import org.corpus_tools.salt.core.SProcessingAnnotation;
 import org.eclipse.emf.common.util.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
-
-import de.hu_berlin.german.korpling.saltnpepper.pepper.modules.exceptions.PepperModuleException;
-import de.hu_berlin.german.korpling.saltnpepper.salt.SaltFactory;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SCorpus;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SDocument;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SDominanceRelation;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SPointingRelation;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SStructure;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.STextualDS;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.STextualRelation;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SToken;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SAnnotatableElement;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SAnnotation;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SMetaAnnotatableElement;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SMetaAnnotation;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SProcessingAnnotatableElement;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SProcessingAnnotation;
 
 public class Perseus2SaltMapper extends DefaultHandler {
 	private static final Logger logger = LoggerFactory.getLogger(Perseus2SaltMapper.class);
@@ -300,7 +297,7 @@ public class Perseus2SaltMapper extends DefaultHandler {
 	};
 
 	public void setCorpus(SCorpus a_sCorpus) {
-		this.addSMetaAnnotationString(a_sCorpus, IConstants.ANN_CORPUS_NAME, a_sCorpus.getSName());
+		this.addSMetaAnnotationString(a_sCorpus, IConstants.ANN_CORPUS_NAME, a_sCorpus.getName());
 		Iterator<SDocument> dIter = this.docList.iterator();
 		int num = 0;
 		while (dIter.hasNext()) {
@@ -383,12 +380,12 @@ public class Perseus2SaltMapper extends DefaultHandler {
 			}
 			String fullname = IConstants.NS + "::" + shortname;
 
-			SAnnotation ann = this.currentSentence.getSAnnotation(fullname);
+			SAnnotation ann = this.currentSentence.getAnnotation(fullname);
 			if (this.currentSentence != null) {
 				if (ann != null) {
-					ann.setSValue(ann.getSValue() + "," + this.currentText);
+					ann.setValue(ann.getValue() + "," + this.currentText);
 				} else {
-					ann = this.addSAnnotationString(this.currentSentence, shortname, this.currentText);
+					ann = this.addAnnotationString(this.currentSentence, shortname, this.currentText);
 				}
 			}
 		} else if (a_qName.equals("sentence")) {
@@ -434,18 +431,18 @@ public class Perseus2SaltMapper extends DefaultHandler {
 		this.initDocument();
 		this.sDocument = a_sDocument;
 		this.docList.add(a_sDocument);
-		logger.debug("Creating DocumentGraph for " + this.getDocument().getSId());
-		this.sDocument.setSDocumentGraph(SaltFactory.eINSTANCE.createSDocumentGraph());
+		logger.debug("Creating DocumentGraph for " + this.getDocument().getId());
+		this.sDocument.setDocumentGraph(SaltFactory.createSDocumentGraph());
 		String name = this.getDocName(a_sDocument);
-		this.sDocument.getSDocumentGraph().setSName(name);
-		this.sDocument.getSDocumentGraph().setSId(this.getDocument().getSId());
+		this.sDocument.getDocumentGraph().setName(name);
+		this.sDocument.getDocumentGraph().setId(this.getDocument().getId());
 
 		logger.debug("Adding TextDS");
 		// TODO not sure if we want to associate a primary text element or
 		// not...
-		STextualDS sTextDS = SaltFactory.eINSTANCE.createSTextualDS();
+		STextualDS sTextDS = SaltFactory.createSTextualDS();
 		this.setText(sTextDS);
-		this.sDocument.getSDocumentGraph().addSNode(sTextDS);
+		this.sDocument.getDocumentGraph().addNode(sTextDS);
 		this.addSMetaAnnotationString(this.getDocument(), IConstants.ANN_DOCUMENT_ID, name);
 	}
 
@@ -488,12 +485,12 @@ public class Perseus2SaltMapper extends DefaultHandler {
 	 * @param a_date
 	 *            the date object
 	 */
-	private void addDate(SMetaAnnotatableElement a_elem, Date a_date) {
-		SMetaAnnotation ann = SaltFactory.eINSTANCE.createSMetaAnnotation();
+	private void addDate(SAnnotationContainer a_elem, Date a_date) {
+		SMetaAnnotation ann = SaltFactory.createSMetaAnnotation();
 		ann.setNamespace(IConstants.NS);
-		ann.setSName(IConstants.ANN_DATE);
+		ann.setName(IConstants.ANN_DATE);
 		ann.setValue(a_date);
-		a_elem.addSMetaAnnotation(ann);
+		a_elem.addMetaAnnotation(ann);
 	}
 
 	/**
@@ -504,12 +501,12 @@ public class Perseus2SaltMapper extends DefaultHandler {
 	 * @param a_date
 	 *            the date string
 	 */
-	private void addDateString(SMetaAnnotatableElement a_elem, String a_date) {
-		SMetaAnnotation ann = SaltFactory.eINSTANCE.createSMetaAnnotation();
+	private void addDateString(SAnnotationContainer a_elem, String a_date) {
+		SMetaAnnotation ann = SaltFactory.createSMetaAnnotation();
 		ann.setNamespace(IConstants.NS);
-		ann.setSName(IConstants.ANN_DATE);
+		ann.setName(IConstants.ANN_DATE);
 		ann.setValue(a_date);
-		a_elem.addSMetaAnnotation(ann);
+		a_elem.addMetaAnnotation(ann);
 	}
 
 	/**
@@ -546,10 +543,10 @@ public class Perseus2SaltMapper extends DefaultHandler {
 
 		logger.debug("Starting Word");
 
-		SToken sToken = SaltFactory.eINSTANCE.createSToken();
+		SToken sToken = SaltFactory.createSToken();
 
 		// TODO add the word to the layer instead of document?
-		this.getDocument().getSDocumentGraph().addSNode(sToken);
+		this.getDocument().getDocumentGraph().addNode(sToken);
 
 		String postag = a_atts.getValue(IConstants.ATT_POSTAG);
 		String lemmaFull = a_atts.getValue(IConstants.ATT_LEMMA);
@@ -567,30 +564,30 @@ public class Perseus2SaltMapper extends DefaultHandler {
 		String urn = a_atts.getValue(IConstants.ATT_CITE);
 
 		if (urn != null && !urn.equalsIgnoreCase("")) {
-			this.addSAnnotationString(sToken, IConstants.ANN_URN, urn);
+			this.addAnnotationString(sToken, IConstants.ANN_URN, urn);
 			if (this.citation_base_uri != null) {
-				this.addSAnnotationString(sToken, IConstants.ANN_CITE, "<a href='" + this.citation_base_uri + urn + "' target='_blank'>" + IConstants.ANN_CITE_LINK_TEXT + "</a>");
+				this.addAnnotationString(sToken, IConstants.ANN_CITE, "<a href='" + this.citation_base_uri + urn + "' target='_blank'>" + IConstants.ANN_CITE_LINK_TEXT + "</a>");
 			}
 		}
 		// TODO create CTS URN to word using id
-		this.addSAnnotationString(sToken, IConstants.ANN_WORD_ID, cid);
+		this.addAnnotationString(sToken, IConstants.ANN_WORD_ID, cid);
 
 		if (postag != null && !(postag.equalsIgnoreCase(""))) {
 			logger.debug("Adding POSTAG annotation");
 			// Add as-is as annotation on token
-			SAnnotation sAnno = SaltFactory.eINSTANCE.createSAnnotation();
+			SAnnotation sAnno = SaltFactory.createSAnnotation();
 			sAnno.setNamespace(IConstants.NS);
 			sAnno.setName(IConstants.ATT_POSTAG);
-			sAnno.setSValue(postag);
-			sToken.addSAnnotation(sAnno);
+			sAnno.setValue(postag);
+			sToken.addAnnotation(sAnno);
 
 			// add components of pofstag separate annotations
-			SAnnotation pAnno = SaltFactory.eINSTANCE.createSPOSAnnotation();
+			SAnnotation pAnno = SaltFactory.createSPOSAnnotation();
 			String pos = postag.substring(0, 1);
 			if (!pos.equals(IConstants.EMPTY)) {
 				logger.debug("Adding POFS annotation");
-				pAnno.setSValue(this.getLongString(IConstants.ANN_POFS, pos));
-				sToken.addSAnnotation(pAnno);
+				pAnno.setValue(this.getLongString(IConstants.ANN_POFS, pos));
+				sToken.addAnnotation(pAnno);
 			}
 			Iterator<String> iter = postagMap.keySet().iterator();
 			while (iter.hasNext()) {
@@ -608,36 +605,36 @@ public class Perseus2SaltMapper extends DefaultHandler {
 				}
 				if (value != null && !value.equals(IConstants.EMPTY)) {
 					logger.debug("Adding annotation: " + key + "=" + value);
-					sAnno = SaltFactory.eINSTANCE.createSAnnotation();
+					sAnno = SaltFactory.createSAnnotation();
 					sAnno.setNamespace(IConstants.NS);
 					sAnno.setName(key);
-					sAnno.setSValue(this.getLongString(key, value));
-					sToken.addSAnnotation(sAnno);
+					sAnno.setValue(this.getLongString(key, value));
+					sToken.addAnnotation(sAnno);
 				}
 			}
 		}
 
 		if (lemma != null && !lemma.isEmpty()) {
 
-			SAnnotation sAnno = SaltFactory.eINSTANCE.createSLemmaAnnotation();
-			sAnno.setSValue(lemma);
+			SAnnotation sAnno = SaltFactory.createSLemmaAnnotation();
+			sAnno.setValue(lemma);
 			sAnno.setNamespace(IConstants.NS);
-			sToken.addSAnnotation(sAnno);
-			logger.debug("Added Lemma Annotation " + sAnno.getSValueSTEXT());
+			sToken.addAnnotation(sAnno);
+			logger.debug("Added Lemma Annotation " + sAnno.getValue_STEXT());
 
 		}
 
 		if (sense != null && !sense.isEmpty()) {
-			this.addSAnnotationString(sToken, IConstants.ANN_SENSE, sense);
+			this.addAnnotationString(sToken, IConstants.ANN_SENSE, sense);
 		}
 
 		if (form != null && !form.isEmpty()) {
 			logger.debug("Adding Form Annotation");
-			SAnnotation sAnno = SaltFactory.eINSTANCE.createSAnnotation();
-			sAnno.setSValue(form);
+			SAnnotation sAnno = SaltFactory.createSAnnotation();
+			sAnno.setValue(form);
 			sAnno.setNamespace(IConstants.NS);
 			sAnno.setName(IConstants.ATT_FORM);
-			sToken.addSAnnotation(sAnno);
+			sToken.addAnnotation(sAnno);
 		}
 
 		// store the token, head and relation
@@ -646,42 +643,42 @@ public class Perseus2SaltMapper extends DefaultHandler {
 		if (!(head.equals("0"))) {
 			this.saveDependency(head, id, relation);
 		} else {
-			logger.debug("Linking root word to sentence " + this.currentSentence.getSId());
+			logger.debug("Linking root word to sentence " + this.currentSentence.getId());
 			// add dominance relationship between the word and the sentence
-			SDominanceRelation tDomRel = SaltFactory.eINSTANCE.createSDominanceRelation();
-			tDomRel.setSStructure(this.currentSentence);
-			tDomRel.setSTarget(sToken);
-			SAnnotation sAnno = SaltFactory.eINSTANCE.createSAnnotation();
+			SDominanceRelation tDomRel = SaltFactory.createSDominanceRelation();
+			tDomRel.setSource(this.currentSentence);
+			tDomRel.setTarget(sToken);
+			SAnnotation sAnno = SaltFactory.createSAnnotation();
 			sAnno.setNamespace(IConstants.NS);
-			sAnno.setSName(IConstants.ANN_RELATION);
-			sAnno.setSValue(relation);
-			tDomRel.addSAnnotation(sAnno);
-			this.getDocument().getSDocumentGraph().addSRelation(tDomRel);
-			logger.debug("Linked root word to sentence " + this.currentSentence.getSId());
+			sAnno.setName(IConstants.ANN_RELATION);
+			sAnno.setValue(relation);
+			tDomRel.addAnnotation(sAnno);
+			this.getDocument().getDocumentGraph().addRelation(tDomRel);
+			logger.debug("Linked root word to sentence " + this.currentSentence.getId());
 		}
 		// create an empty text, if there is none
-		if (this.getTextDS().getSText() == null)
-			this.getTextDS().setSText("");
+		if (this.getTextDS().getText() == null)
+			this.getTextDS().setText("");
 
 		// if text of token isn't empty put a separator to its end
 
-		this.getTextDS().setSText(this.getTextDS().getSText() + this.DEFAULT_SEPARATOR);
+		this.getTextDS().setText(this.getTextDS().getText() + this.DEFAULT_SEPARATOR);
 
 		Integer startPos = 0;
 		Integer endPos = 0;
 
 		// set startpos to current text length
-		startPos = this.getTextDS().getSText().length();
-		this.getTextDS().setSText(this.getTextDS().getSText() + form);
-		endPos = this.getTextDS().getSText().length();
+		startPos = this.getTextDS().getText().length();
+		this.getTextDS().setText(this.getTextDS().getText() + form);
+		endPos = this.getTextDS().getText().length();
 
 		// create STextualRelation
-		STextualRelation sTextRel = SaltFactory.eINSTANCE.createSTextualRelation();
-		sTextRel.setSTextualDS(this.getTextDS());
-		sTextRel.setSToken(sToken);
-		sTextRel.setSStart(startPos);
-		sTextRel.setSEnd(endPos);
-		this.getDocument().getSDocumentGraph().addSRelation(sTextRel);
+		STextualRelation sTextRel = SaltFactory.createSTextualRelation();
+		sTextRel.setTarget(this.getTextDS());
+		sTextRel.setSource(sToken);
+		sTextRel.setStart(startPos);
+		sTextRel.setEnd(endPos);
+		this.getDocument().getDocumentGraph().addRelation(sTextRel);
 
 	}
 
@@ -692,14 +689,14 @@ public class Perseus2SaltMapper extends DefaultHandler {
 	 */
 	private void startSentence(Attributes a_atts) {
 		logger.debug("Adding Sentence " + a_atts.getValue("id"));
-		SStructure sStructure = SaltFactory.eINSTANCE.createSStructure();
-		this.getDocument().getSDocumentGraph().addSNode(sStructure);
+		SStructure sStructure = SaltFactory.createSStructure();
+		this.getDocument().getDocumentGraph().addNode(sStructure);
 		this.currentSentence = sStructure;
 
-		SAnnotation sAnno = SaltFactory.eINSTANCE.createSCatAnnotation();
+		SAnnotation sAnno = SaltFactory.createSCatAnnotation();
 		sAnno.setNamespace(IConstants.NS);
-		sAnno.setSValue(IConstants.ANN_SENTENCE);
-		sStructure.addSAnnotation(sAnno);
+		sAnno.setValue(IConstants.ANN_SENTENCE);
+		sStructure.addAnnotation(sAnno);
 
 		String docId = a_atts.getValue(IConstants.ATT_DOCID);
 		String subDoc = a_atts.getValue(IConstants.ATT_SUBDOC);
@@ -718,10 +715,10 @@ public class Perseus2SaltMapper extends DefaultHandler {
 				chunkIds.add(docId + ":" + citeDoc);
 			}
 		}
-		this.addSAnnotationString(sStructure, IConstants.ANN_SENTENCE_ID, id);
-		this.addSAnnotationString(sStructure, IConstants.ANN_SUBDOC, StringUtils.join(chunkIds.toArray(), ","));
+		this.addAnnotationString(sStructure, IConstants.ANN_SENTENCE_ID, id);
+		this.addAnnotationString(sStructure, IConstants.ANN_SUBDOC, StringUtils.join(chunkIds.toArray(), ","));
 		if (span != null) {
-			this.addSAnnotationString(sStructure, IConstants.ANN_SPAN, span.replaceAll("\\\\", java.util.regex.Matcher.quoteReplacement("\\\\")));
+			this.addAnnotationString(sStructure, IConstants.ANN_SPAN, span.replaceAll("\\\\", java.util.regex.Matcher.quoteReplacement("\\\\")));
 		}
 
 		// TODO add id as meta annotation
@@ -760,17 +757,17 @@ public class Perseus2SaltMapper extends DefaultHandler {
 				Iterator<String> kiter = relMap.keySet().iterator();
 				while (kiter.hasNext()) {
 					String key = kiter.next();
-					SPointingRelation sRel = SaltFactory.eINSTANCE.createSPointingRelation();
-					sRel.addSType(IConstants.ANN_REL_TYPE_PARENT);
-					sRel.setSSource(parent);
-					this.getDocument().getSDocumentGraph().addSRelation(sRel);
+					SPointingRelation sRel = SaltFactory.createSPointingRelation();
+					sRel.setType(IConstants.ANN_REL_TYPE_PARENT);
+					sRel.setSource(parent);
+					this.getDocument().getDocumentGraph().addRelation(sRel);
 					logger.debug("Adding Dependency Relation: " + (String) relMap.get(key) + " " + a_source + " to " + key + " node " + this.tokenMap.get(key));
-					sRel.setSTarget((SToken) this.tokenMap.get(key));
-					SAnnotation sAnno = SaltFactory.eINSTANCE.createSAnnotation();
+					sRel.setTarget((SToken) this.tokenMap.get(key));
+					SAnnotation sAnno = SaltFactory.createSAnnotation();
 					sAnno.setNamespace(IConstants.NS);
-					sAnno.setSName(IConstants.ANN_RELATION);
-					sAnno.setSValue((String) relMap.get(key));
-					sRel.addSAnnotation(sAnno);
+					sAnno.setName(IConstants.ANN_RELATION);
+					sAnno.setValue((String) relMap.get(key));
+					sRel.addAnnotation(sAnno);
 				}
 			}
 		}
@@ -779,7 +776,7 @@ public class Perseus2SaltMapper extends DefaultHandler {
 	public static void main(String[] a_args) {
 		String documentPath = a_args[0];
 		Perseus2SaltMapper mapper = new Perseus2SaltMapper();
-		SDocument sdoc = SaltFactory.eINSTANCE.createSDocument();
+		SDocument sdoc = SaltFactory.createSDocument();
 		mapper.setDocument(sdoc);
 		File resourceFolder = new File("./src/main/resources");
 		mapper.setResourcesURI(URI.createFileURI(resourceFolder.getAbsolutePath()));
@@ -792,36 +789,36 @@ public class Perseus2SaltMapper extends DefaultHandler {
 		}
 	}
 
-	private SMetaAnnotation addSMetaAnnotationString(SMetaAnnotatableElement a_elem, String a_name, String a_value) {
-		SMetaAnnotation ann = SaltFactory.eINSTANCE.createSMetaAnnotation();
+	private SMetaAnnotation addSMetaAnnotationString(SAnnotationContainer a_elem, String a_name, String a_value) {
+		SMetaAnnotation ann = SaltFactory.createSMetaAnnotation();
 		ann.setNamespace(IConstants.NS);
-		ann.setSName(a_name);
-		ann.setSValue(a_value);
-		a_elem.addSMetaAnnotation(ann);
+		ann.setName(a_name);
+		ann.setValue(a_value);
+		a_elem.addMetaAnnotation(ann);
 		return ann;
 	}
 
-	private SAnnotation addSAnnotationString(SAnnotatableElement a_elem, String a_name, String a_value) {
-		SAnnotation ann = SaltFactory.eINSTANCE.createSAnnotation();
+	private SAnnotation addAnnotationString(SAnnotationContainer a_elem, String a_name, String a_value) {
+		SAnnotation ann = SaltFactory.createSAnnotation();
 		ann.setNamespace(IConstants.NS);
-		ann.setSName(a_name);
-		ann.setSValue(a_value);
-		a_elem.addSAnnotation(ann);
+		ann.setName(a_name);
+		ann.setValue(a_value);
+		a_elem.addAnnotation(ann);
 		return ann;
 	}
 
-	private SProcessingAnnotation addSProcessingAnnotationString(SProcessingAnnotatableElement a_elem, String a_name, String a_value) {
-		SProcessingAnnotation ann = SaltFactory.eINSTANCE.createSProcessingAnnotation();
+	private SProcessingAnnotation addSProcessingAnnotationString(SAnnotationContainer a_elem, String a_name, String a_value) {
+		SProcessingAnnotation ann = SaltFactory.createSProcessingAnnotation();
 		ann.setNamespace(IConstants.NS);
-		ann.setSName(a_name);
-		ann.setSValue(a_value);
-		a_elem.addSProcessingAnnotation(ann);
+		ann.setName(a_name);
+		ann.setValue(a_value);
+		a_elem.addProcessingAnnotation(ann);
 		return ann;
 	}
 
 	private String getDocName(SDocument a_doc) {
 		String name = "";
-		URI uri = a_doc.getSElementPath();
+		URI uri = a_doc.getPath();
 		int segs = uri.segmentCount();
 		if (segs > 1) // not a top level corpus
 		{
