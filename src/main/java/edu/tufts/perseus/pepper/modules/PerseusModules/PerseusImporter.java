@@ -22,6 +22,7 @@ import java.util.Properties;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.corpus_tools.pepper.common.PepperConfiguration;
 import org.corpus_tools.pepper.impl.PepperImporterImpl;
 import org.corpus_tools.pepper.modules.PepperImporter;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
@@ -49,7 +50,7 @@ public class PerseusImporter extends PepperImporterImpl implements PepperImporte
 		super();
 		//set name of module
 		this.setName("AldtImporter");
-		setSupplierContact(URI.createURI("saltnpepper@lists.hu-berlin.de"));
+		setSupplierContact(URI.createURI(PepperConfiguration.EMAIL));
 		setSupplierHomepage(URI.createURI("https://github.com/korpling/pepperModules-PerseusModules"));
 		setDesc("This importer transforms data in aldt format used in the Perseus project to a Salt model. ");
 		//set list of formats supported by this module
