@@ -4,14 +4,14 @@
 	<parent>
 		<groupId>org.corpus-tools</groupId>
 		<artifactId>pepper-parentModule</artifactId>
-		<version>3.0.0-SNAPSHOT</version>
+		<version>3.0.0</version>
 	</parent>
 	<groupId>edu.tufts.perseus</groupId>
 	<artifactId>pepperModules-PerseusModules</artifactId>
 	<version>0.0.9-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 	<description>The PerseusModules project provides an importer for mapping data from the Perseus format, used by the perseus project (see: http://nlp.perseus.tufts.edu/syntax/treebank/greek.html) to Salt.</description>
-	<url>https://korpling.german.hu-berlin.de/p/projects/perseusmodules</url>
+	<url>https://github.com/korpling/pepperModules-PerseusModules</url>
 	<issueManagement>
 		<system>GitHub</system>
 		<url>https://github.com/korpling/pepperModules-PerseusModules/issues</url>
@@ -21,81 +21,9 @@
 		<url>https://korpling.german.hu-berlin.de/jenkins/</url>
 	</ciManagement>
 	<inceptionYear>2011</inceptionYear>
-	<repositories>
-		<repository>
-			<id>korpling</id>
-			<name>korpling maven repo</name>
-			<url>http://korpling.german.hu-berlin.de/maven2</url>
-		</repository>
-	</repositories>
 	<scm>
 		<connection>scm:git:git://github.com/korpling/pepperModules-PerseusModules.git</connection>
 		<developerConnection>scm:git:git@github.com:korpling/pepperModules-PerseusModules.git</developerConnection>
 		<url>https://github.com/korpling/pepperModules-PerseusModules</url>
 	</scm>
-	<distributionManagement>
-		<repository>
-			<id>korpling</id>
-			<name>korpling maven repo</name>
-			<url>file:///srv/www/maven2/</url>
-		</repository>
-	</distributionManagement>
-	<dependencies>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>3.0</version>
-		</dependency>
-	</dependencies>
-	<build>
-		<plugins>
-			<plugin>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>${maven-release-plugin.version}</version>
-				<executions>
-					<execution>
-						<id>default</id>
-						<goals>
-							<goal>perform</goal>
-						</goals>
-						<configuration>
-							<pomFileName>pepperModules-PerseusModules/pom.xml</pomFileName>
-						</configuration>
-					</execution>
-				</executions>
-				<configuration>
-					<releaseProfiles>release</releaseProfiles>
-					<goals>package assembly:single deploy</goals>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<version>${maven-bundle-plugin.version}</version>
-				<extensions>true</extensions>
-				<executions>
-					<execution>
-						<phase>process-classes</phase>
-						<goals>
-							<goal>bundle</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<manifestLocation>${META-INF}</manifestLocation>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
-					<instructions>
-						<Bundle-Name>${project.artifactId}</Bundle-Name>
-						<Bundle-SymbolicName>${project.groupId}.${project.artifactId};singleton:=true</Bundle-SymbolicName>
-						<Bundle-Version>${project.version}</Bundle-Version>
-						<Bundle-RequiredExecutionEnvironment>JavaSE-${java.version}</Bundle-RequiredExecutionEnvironment>
-						<Service-Component>${allServiceComponents}</Service-Component>
-						<Bundle-ClassPath>.,{maven-dependencies}</Bundle-ClassPath>
-						<Include-Resource>{maven-resources}, LICENSE, NOTICE</Include-Resource>
-					</instructions>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
 </project>
