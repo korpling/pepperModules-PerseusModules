@@ -6,7 +6,7 @@
 		<artifactId>pepper-parentModule</artifactId>
 		<version>3.0.0</version>
 	</parent>
-	<groupId>edu.tufts.perseus</groupId>
+	<groupId>org.corpus-tools</groupId>
 	<artifactId>pepperModules-PerseusModules</artifactId>
 	<version>0.0.9-SNAPSHOT</version>
 	<packaging>bundle</packaging>
