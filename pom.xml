@@ -7,7 +7,7 @@
 	</parent>
 	<groupId>org.corpus-tools</groupId>
 	<artifactId>pepperModules-PerseusModules</artifactId>
-	<version>0.0.10-SNAPSHOT</version>
+	<version>0.0.10</version>
 	<packaging>bundle</packaging>
 	<description>The PerseusModules project provides an importer for mapping data from the Perseus format, used by the perseus project (see: http://nlp.perseus.tufts.edu/syntax/treebank/greek.html) to Salt.</description>
 	<url>https://github.com/korpling/pepperModules-PerseusModules</url>
@@ -24,6 +24,6 @@
 		<connection>scm:git:git://github.com/korpling/pepperModules-PerseusModules.git</connection>
 		<developerConnection>scm:git:git@github.com:korpling/pepperModules-PerseusModules.git</developerConnection>
 		<url>https://github.com/korpling/pepperModules-PerseusModules</url>
-	  <tag>HEAD</tag>
+	  <tag>pepperModules-PerseusModules-0.0.10</tag>
   </scm>
 </project>
